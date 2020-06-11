@@ -1465,73 +1465,18 @@ class BattleScene {
 		this.preloadImage(Dex.resourcePrefix + 'sprites/ani-back/substitute.gif');
 	}
 	rollBgm() {
-		this.setBgm(1 + this.numericId % 15);
+		this.setBgm(1 + this.numericId % 16);
 	}
 	setBgm(bgmNum: number) {
 		if (this.bgmNum === bgmNum) return;
 		this.bgmNum = bgmNum;
 
-		let ext = window.nodewebkit ? '.ogg' : '.mp3';
-		switch (bgmNum) {
-		case -1:
-			this.bgm = BattleSound.loadBgm('audio/bw2-homika-dogars' + ext, 1661, 68131, this.bgm);
-			break;
-		case -2:
-			this.bgm = BattleSound.loadBgm('audio/xd-miror-b' + ext, 9000, 57815, this.bgm);
-			break;
-		case -3:
-			this.bgm = BattleSound.loadBgm('audio/colosseum-miror-b' + ext, 896, 47462, this.bgm);
-			break;
-		case 1:
-			this.bgm = BattleSound.loadBgm('audio/dpp-trainer' + ext, 13440, 96959, this.bgm);
-			break;
-		case 2:
-			this.bgm = BattleSound.loadBgm('audio/dpp-rival' + ext, 13888, 66352, this.bgm);
-			break;
-		case 3:
-			this.bgm = BattleSound.loadBgm('audio/hgss-johto-trainer' + ext, 23731, 125086, this.bgm);
-			break;
-		case 4:
-			this.bgm = BattleSound.loadBgm('audio/hgss-kanto-trainer' + ext, 13003, 94656, this.bgm);
-			break;
-		case 5:
-			this.bgm = BattleSound.loadBgm('audio/bw-trainer' + ext, 14629, 110109, this.bgm);
-			break;
-		case 6:
-			this.bgm = BattleSound.loadBgm('audio/bw-rival' + ext, 19180, 57373, this.bgm);
-			break;
-		case 7:
-			this.bgm = BattleSound.loadBgm('audio/bw-subway-trainer' + ext, 15503, 110984, this.bgm);
-			break;
-		case 8:
-			this.bgm = BattleSound.loadBgm('audio/bw2-kanto-gym-leader' + ext, 14626, 58986, this.bgm);
-			break;
-		case 9:
-			this.bgm = BattleSound.loadBgm('audio/bw2-rival' + ext, 7152, 68708, this.bgm);
-			break;
-		case 10:
-			this.bgm = BattleSound.loadBgm('audio/xy-trainer' + ext, 7802, 82469, this.bgm);
-			break;
-		case 11:
-			this.bgm = BattleSound.loadBgm('audio/xy-rival' + ext, 7802, 58634, this.bgm);
-			break;
-		case 12:
-			this.bgm = BattleSound.loadBgm('audio/oras-trainer' + ext, 13579, 91548, this.bgm);
-			break;
-		case 13:
-			this.bgm = BattleSound.loadBgm('audio/oras-rival' + ext, 14303, 69149, this.bgm);
-			break;
-		case 14:
-			this.bgm = BattleSound.loadBgm('audio/sm-trainer' + ext, 8323, 89230, this.bgm);
-			break;
-		case -101:
-			this.bgm = BattleSound.loadBgm('audio/spl-elite4' + ext, 3962, 152509, this.bgm);
-			break;
-		case 15:
-		default:
-			this.bgm = BattleSound.loadBgm('audio/sm-rival' + ext, 11389, 62158, this.bgm);
-			break;
-		}
+		//let ext = window.nodewebkit ? '.ogg' : '.mp3';
+                if (bgmNum>20 || bgmNum<1) {
+			this.bgm = BattleSound.loadBgm('/th8/16', 5001, 153819, this.bgm);
+                } else {
+			this.bgm = BattleSound.loadBgm('/th8/'+(bgmNum+1), 5001, 153819, this.bgm);
+                }
 	}
 	updateBgm() {
 		/**
@@ -2718,15 +2663,17 @@ interface SMSound {
 	playState: 0 | 1;
 	isSoundPlaceholder?: boolean;
 }
+
+// TODO: please fix looping. perhaps use howler.js.
 class BattleBGM {
 	/**
 	 * May be shared with other BGM objects: every battle has its own BattleBGM
 	 * object, but two battles with the same music will have the same SMSound
 	 * object.
 	 */
-	sound: SMSound;
+	sound: Gapless5;
 	isPlaying = false;
-	constructor(sound: SMSound) {
+	constructor(sound: Gapless5) {
 		this.sound = sound;
 	}
 	play() {
@@ -2743,11 +2690,8 @@ class BattleBGM {
 				break;
 			}
 		}
-		this.sound.setVolume(BattleSound.bgmVolume);
-		// SoundManager bugs out if you call .play() while it's already playing
-		if (!this.sound.playState || this.sound.paused) {
-			this.sound.play();
-		}
+		this.sound.setGain(BattleSound.bgmVolume*655.35);
+		this.sound.play();
 	}
 	pause() {
 		this.isPlaying = false;
@@ -2757,6 +2701,7 @@ class BattleBGM {
 	stop() {
 		this.isPlaying = false;
 		this.sound.stop();
+		this.sound.gotoTrack(0,false);
 	}
 	destroy() {
 		this.isPlaying = false;
@@ -2771,11 +2716,7 @@ class BattleBGM {
 				if (BattleSound.muted || !BattleSound.bgmVolume) {
 					bgm.sound.pause();
 				} else {
-					bgm.sound.setVolume(BattleSound.bgmVolume);
-					// SoundManager bugs out if you call .play() while it's already playing
-					if (!bgm.sound.playState || bgm.sound.paused) {
-						bgm.sound.play();
-					}
+					bgm.sound.setGain(BattleSound.bgmVolume*655.35);
 				}
 				break;
 			}
@@ -2786,7 +2727,7 @@ const BattleSound = new class {
 	effectCache: {[url: string]: SMSound} = {};
 
 	// bgm
-	bgmCache: {[url: string]: SMSound} = {};
+	bgmCache: {[url: string]: Gapless5} = {};
 	bgm: BattleBGM[] = [];
 
 	// misc
@@ -2825,7 +2766,7 @@ const BattleSound = new class {
 		if (!this.muted) this.loadEffect(url).setVolume(this.effectVolume).play();
 	}
 
-	addBgm(sound: SMSound, replaceBGM?: BattleBGM | null) {
+	addBgm(sound: Gapless5, replaceBGM?: BattleBGM | null) {
 		if (replaceBGM) {
 			replaceBGM.sound.stop();
 			replaceBGM.sound = sound;
@@ -2846,20 +2787,22 @@ const BattleSound = new class {
 			}
 		}
 		try {
-			sound = soundManager.createSound({
-				id: url,
-				url: Dex.resourcePrefix + url,
-				volume: this.bgmVolume,
-			});
+                        sound = new Gapless5("gapless5-block", {
+                          loop: true,
+                          tracks: [url+"_intro.wav", url+"_loop.wav"],
+                        });
 		} catch {}
 		if (!sound) {
 			// couldn't load
 			// suppress crash
 			return this.addBgm(this.bgmCache[url] = this.soundPlaceholder, replaceBGM);
 		}
+	        sound.setGain(this.bgmVolume*655.35);
+                /*
 		sound.onposition(loopend, function () {
 			this.setPosition(this.position - (loopend - loopstart));
 		});
+                */
 		this.bgmCache[url] = sound;
 		return this.addBgm(sound, replaceBGM);
 	}
