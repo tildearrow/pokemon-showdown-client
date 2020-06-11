@@ -113,6 +113,7 @@ if (typeof window === 'undefined') {
 	window.exports = window;
 }
 
+// TODO; this won't work anymore due to audio auto-play restrictions
 if (window.soundManager) {
 	soundManager.setup({url: 'https://play.pokemonshowdown.com/swf/'});
 	if (window.Replays) soundManager.onready(window.Replays.soundReady);
@@ -278,6 +279,12 @@ const Dex = new class implements ModdedDex {
 		let prefix = '';
 		if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
 		return `${prefix}//play.pokemonshowdown.com/`;
+	})();
+
+	bgmPrefix = (() => {
+		let prefix = '';
+		if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
+		return `${prefix}//tildearrow.zapto.org/psc/`;
 	})();
 
 	fxPrefix = (() => {
@@ -698,7 +705,7 @@ const Dex = new class implements ModdedDex {
 		}
 
 		if (animationData[facing + 'f'] && options.gender === 'F') facing += 'f';
-		let allowAnim = !Dex.prefs('noanim') && !Dex.prefs('nogif');
+		let allowAnim = true; //!Dex.prefs('noanim') && !Dex.prefs('nogif');
 		if (allowAnim && spriteData.gen >= 6) spriteData.pixelated = false;
 		if (allowAnim && animationData[facing] && spriteData.gen >= 5) {
 			if (facing.slice(-1) === 'f') name += '-f';
@@ -718,7 +725,9 @@ const Dex = new class implements ModdedDex {
 				name += '-f';
 			}
 
-			spriteData.url += dir + '/' + name + '.png';
+			//spriteData.url += dir + '/' + name + '.png';
+			spriteData.url += baseDir + 'ani/' + name + '.gif';
+                        console.log("Could not load animated sprite! animationData[facing] is "+animationData[facing]);
 		}
 
 		if (!options.noScale) {
