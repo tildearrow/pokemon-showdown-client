@@ -528,6 +528,7 @@ class BattleScene {
 			animEntry = BattleMoveAnims['tackle'];
 		}
 		animEntry.anim(this, participants.map(p => p.sprite));
+                BattleSound.playLocalEffect("/psc/audio/moves/src/"+BattleMoveSounds[moveid]);
 	}
 
 	runOtherAnim(moveid: ID, participants: Pokemon[]) {
@@ -1465,17 +1466,16 @@ class BattleScene {
 		this.preloadImage(Dex.resourcePrefix + 'sprites/ani-back/substitute.gif');
 	}
 	rollBgm() {
-		this.setBgm(1 + this.numericId % 16);
+		this.setBgm(1 + this.numericId % 69);
 	}
 	setBgm(bgmNum: number) {
 		if (this.bgmNum === bgmNum) return;
 		this.bgmNum = bgmNum;
 
-		//let ext = window.nodewebkit ? '.ogg' : '.mp3';
-                if (bgmNum>20 || bgmNum<1) {
-			this.bgm = BattleSound.loadBgm('/th8/16', 5001, 153819, this.bgm);
+                if (bgmNum>68 || bgmNum<1) {
+			this.bgm = BattleSound.loadBgm('/psc/audio/bgm/56', 5001, 153819, this.bgm);
                 } else {
-			this.bgm = BattleSound.loadBgm('/th8/'+(bgmNum+1), 5001, 153819, this.bgm);
+			this.bgm = BattleSound.loadBgm('/psc/audio/bgm/'+bgmNum, 5001, 153819, this.bgm);
                 }
 	}
 	updateBgm() {
@@ -2706,6 +2706,7 @@ class BattleBGM {
 	destroy() {
 		this.isPlaying = false;
 		this.sound.stop();
+		this.sound.gotoTrack(0,false);
 		const soundIndex = BattleSound.bgm.indexOf(this);
 		if (soundIndex >= 0) BattleSound.bgm.splice(soundIndex, 1);
 		BattleBGM.update();
@@ -2766,6 +2767,26 @@ const BattleSound = new class {
 		if (!this.muted) this.loadEffect(url).setVolume(this.effectVolume).play();
 	}
 
+	loadLocalEffect(url: string) {
+		if (this.effectCache[url] && !this.effectCache[url].isSoundPlaceholder) {
+			return this.effectCache[url];
+		}
+		try {
+			this.effectCache[url] = soundManager.createSound({
+				id: url,
+				url: url,
+				volume: this.effectVolume,
+			}) as SMSound;
+		} catch {}
+		if (!this.effectCache[url]) {
+			this.effectCache[url] = this.soundPlaceholder;
+		}
+		return this.effectCache[url];
+	}
+	playLocalEffect(url: string) {
+		if (!this.muted) this.loadLocalEffect(url).setVolume(this.effectVolume).play();
+	}
+
 	addBgm(sound: Gapless5, replaceBGM?: BattleBGM | null) {
 		if (replaceBGM) {
 			replaceBGM.sound.stop();
@@ -2787,9 +2808,11 @@ const BattleSound = new class {
 			}
 		}
 		try {
+		        let ext = ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) ? '.mp3' : '.ogg';
+                        alert(location.host);
                         sound = new Gapless5("gapless5-block", {
                           loop: true,
-                          tracks: [url+"_intro.wav", url+"_loop.wav"],
+                          tracks: [url+"_intro"+ext, url+"_loop"+ext],
                         });
 		} catch {}
 		if (!sound) {

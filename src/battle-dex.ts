@@ -725,8 +725,8 @@ const Dex = new class implements ModdedDex {
 				name += '-f';
 			}
 
-			//spriteData.url += dir + '/' + name + '.png';
-			spriteData.url += baseDir + 'ani/' + name + '.gif';
+			spriteData.url += dir + '/' + name + '.png';
+			//spriteData.url += baseDir + 'ani/' + name + '.gif';
                         console.log("Could not load animated sprite! animationData[facing] is "+animationData[facing]);
 		}
 
