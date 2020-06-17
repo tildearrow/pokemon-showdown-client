@@ -1071,7 +1071,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
  *********************************************************/
 
 {
-	const Formats = requireNoCache('../data/Pokemon-Showdown/.config-dist/formats.js').Formats;
+	const Formats = requireNoCache('../data/pokemon-showdown/.config-dist/formats.js').Formats;
 	const buf = 'exports.Formats = ' + es3stringify(Formats) + ';';
 	fs.writeFileSync('data/formats.js', buf);
 }
