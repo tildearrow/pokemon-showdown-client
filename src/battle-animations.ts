@@ -528,7 +528,9 @@ class BattleScene {
 			animEntry = BattleMoveAnims['tackle'];
 		}
 		animEntry.anim(this, participants.map(p => p.sprite));
-                BattleSound.playLocalEffect("/psc/audio/moves/src/"+BattleMoveSounds[moveid]);
+
+	        let soundExt = ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) ? '.mp3' : '.ogg';
+                BattleSound.playLocalEffect("/psc/audio/moves/"+BattleMoveSounds[moveid]+soundExt);
 	}
 
 	runOtherAnim(moveid: ID, participants: Pokemon[]) {
@@ -2650,25 +2652,11 @@ Object.assign($.easing, {
 	},
 });
 
-interface SMSound {
-	play(): this;
-	pause(): this;
-	stop(): this;
-	resume(): this;
-	setVolume(volume: number): this;
-	setPosition(position: number): this;
-	onposition(position: number, callback: (this: this) => void): this;
-	position: number;
-	readonly paused: boolean;
-	playState: 0 | 1;
-	isSoundPlaceholder?: boolean;
-}
-
 // TODO: please fix looping. perhaps use howler.js.
 class BattleBGM {
 	/**
 	 * May be shared with other BGM objects: every battle has its own BattleBGM
-	 * object, but two battles with the same music will have the same SMSound
+	 * object, but two battles with the same music will have the same SMSound- erm Audio
 	 * object.
 	 */
 	sound: Gapless5;
@@ -2725,22 +2713,14 @@ class BattleBGM {
 	}
 }
 const BattleSound = new class {
-	effectCache: {[url: string]: SMSound} = {};
+	effectCache: {[url: string]: Audio} = {};
 
 	// bgm
 	bgmCache: {[url: string]: Gapless5} = {};
 	bgm: BattleBGM[] = [];
 
 	// misc
-	soundPlaceholder: SMSound = {
-		play() { return this; },
-		pause() { return this; },
-		stop() { return this; },
-		resume() { return this; },
-		setVolume() { return this; },
-		onposition() { return this; },
-		isSoundPlaceholder: true,
-	} as any;
+	soundPlaceholder: Audio = new Audio();
 
 	// options
 	effectVolume = 50;
@@ -2752,11 +2732,8 @@ const BattleSound = new class {
 			return this.effectCache[url];
 		}
 		try {
-			this.effectCache[url] = soundManager.createSound({
-				id: url,
-				url: Dex.resourcePrefix + url,
-				volume: this.effectVolume,
-			}) as SMSound;
+			this.effectCache[url] = new Audio(Dex.resourcePrefix + url);
+                        this.effectCache[url].volume=this.effectVolume/100;
 		} catch {}
 		if (!this.effectCache[url]) {
 			this.effectCache[url] = this.soundPlaceholder;
@@ -2764,7 +2741,11 @@ const BattleSound = new class {
 		return this.effectCache[url];
 	}
 	playEffect(url: string) {
-		if (!this.muted) this.loadEffect(url).setVolume(this.effectVolume).play();
+		if (!this.muted) {
+                  var s=this.loadEffect(url);
+                  s.volume=this.effectVolume/100;
+                  s.play();
+                }
 	}
 
 	loadLocalEffect(url: string) {
@@ -2772,11 +2753,8 @@ const BattleSound = new class {
 			return this.effectCache[url];
 		}
 		try {
-			this.effectCache[url] = soundManager.createSound({
-				id: url,
-				url: url,
-				volume: this.effectVolume,
-			}) as SMSound;
+			this.effectCache[url] = new Audio(url);
+                        this.effectCache[url].volume=this.effectVolume/100;
 		} catch {}
 		if (!this.effectCache[url]) {
 			this.effectCache[url] = this.soundPlaceholder;
@@ -2784,7 +2762,11 @@ const BattleSound = new class {
 		return this.effectCache[url];
 	}
 	playLocalEffect(url: string) {
-		if (!this.muted) this.loadLocalEffect(url).setVolume(this.effectVolume).play();
+		if (!this.muted) {
+                  var s=this.loadLocalEffect(url);
+                  s.volume=this.effectVolume/100;
+                  s.play();
+                }
 	}
 
 	addBgm(sound: Gapless5, replaceBGM?: BattleBGM | null) {
@@ -2809,7 +2791,6 @@ const BattleSound = new class {
 		}
 		try {
 		        let ext = ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) ? '.mp3' : '.ogg';
-                        alert(location.host);
                         sound = new Gapless5("gapless5-block", {
                           loop: true,
                           tracks: [url+"_intro"+ext, url+"_loop"+ext],
