@@ -2728,6 +2728,22 @@ const BattleSound = new class {
 	muted = false;
 
 	loadEffect(url: string) {
+	        if ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) {
+                  if (this.effectCache['mono']) {
+                      this.effectCache['mono'].src = Dex.resourcePrefix + url;
+                      this.effectCache['mono'].load();
+                      this.effectCache['mono'].volume=this.effectVolume/100;
+                  } else {
+		    try {
+                      this.effectCache['mono'] = new Audio(Dex.resourcePrefix + url);
+                      this.effectCache['mono'].volume=this.effectVolume/100;
+		    } catch {}
+   		    if (!this.effectCache['mono']) {
+		      this.effectCache['mono'] = this.soundPlaceholder;
+		    }
+                  }
+		  return this.effectCache['mono'];
+                }
 		if (this.effectCache[url] && !this.effectCache[url].isSoundPlaceholder) {
 			return this.effectCache[url];
 		}
@@ -2744,11 +2760,31 @@ const BattleSound = new class {
 		if (!this.muted) {
                   var s=this.loadEffect(url);
                   s.volume=this.effectVolume/100;
-                  s.play();
+                  try {
+                    if (s.paused) s.play();
+                  } catch {
+                    alert("You must allow autoplay for this to work.");
+                  }
                 }
 	}
 
 	loadLocalEffect(url: string) {
+	        if ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) {
+                  if (this.effectCache['mono']) {
+                      this.effectCache['mono'].src = url;
+                      this.effectCache['mono'].load();
+                      this.effectCache['mono'].volume=this.effectVolume/100;
+                  } else {
+		    try {
+                      this.effectCache['mono'] = new Audio(url);
+                      this.effectCache['mono'].volume=this.effectVolume/100;
+		    } catch {}
+   		    if (!this.effectCache['mono']) {
+		      this.effectCache['mono'] = this.soundPlaceholder;
+		    }
+                  }
+		  return this.effectCache['mono'];
+                }
 		if (this.effectCache[url] && !this.effectCache[url].isSoundPlaceholder) {
 			return this.effectCache[url];
 		}
@@ -2765,7 +2801,7 @@ const BattleSound = new class {
 		if (!this.muted) {
                   var s=this.loadLocalEffect(url);
                   s.volume=this.effectVolume/100;
-                  s.play();
+                  if (s.paused) s.play();
                 }
 	}
 
@@ -2782,15 +2818,23 @@ const BattleSound = new class {
 	}
 
 	/** loopstart and loopend are in milliseconds */
+        // TODO: only one instance of Gapless-5 at a time
 	loadBgm(url: string, loopstart: number, loopend: number, replaceBGM?: BattleBGM | null) {
-		let sound = this.bgmCache[url];
+		let sound = this.bgmCache['music'];
+		let ext = ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) ? '.mp3' : '.ogg';
 		if (sound) {
 			if (!sound.isSoundPlaceholder) {
-				return this.addBgm(sound, replaceBGM);
+                          sound.stop();
+                          sound.insertTrack(0,url+"_intro"+ext);
+                          sound.insertTrack(1,url+"_loop"+ext);
+                          sound.gotoTrack(0,false);
+                          sound.removeTrack(2);
+                          sound.removeTrack(2);
+	                  sound.setGain(this.bgmVolume*655.35);
+			  return this.addBgm(sound, replaceBGM);
 			}
 		}
 		try {
-		        let ext = ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) ? '.mp3' : '.ogg';
                         sound = new Gapless5("gapless5-block", {
                           loop: true,
                           tracks: [url+"_intro"+ext, url+"_loop"+ext],
@@ -2799,15 +2843,10 @@ const BattleSound = new class {
 		if (!sound) {
 			// couldn't load
 			// suppress crash
-			return this.addBgm(this.bgmCache[url] = this.soundPlaceholder, replaceBGM);
+                        alert("we are crashing here!");
 		}
 	        sound.setGain(this.bgmVolume*655.35);
-                /*
-		sound.onposition(loopend, function () {
-			this.setPosition(this.position - (loopend - loopstart));
-		});
-                */
-		this.bgmCache[url] = sound;
+		this.bgmCache['music'] = sound;
 		return this.addBgm(sound, replaceBGM);
 	}
 

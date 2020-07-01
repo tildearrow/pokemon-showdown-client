@@ -378,10 +378,12 @@
 			buf += '<p class="music-volume"><label class="optlabel">Music volume:</label>' + (muted ? '<em>(muted)</em>' : '<input type="range" min="0" max="100" step="1" name="musicvolume" value="' + (Dex.prefs('musicvolume') || 50) + '" />') + '</p>';
 			buf += '<p class="notif-volume"><label class="optlabel">Notification volume:</label>' + (muted ? '<em>(muted)</em>' : '<input type="range" min="0" max="100" step="1" name="notifvolume" value="' + (Dex.prefs('notifvolume') || 50) + '" />') + '</p>';
 			buf += '<p><label class="optlabel"><input type="checkbox" name="muted"' + (muted ? ' checked' : '') + ' /> Mute sounds</label></p>';
+			buf += '<p><input type="button" name="soundtest" value="Sound test"></input></p>';
 			this.$el.html(buf).css('min-width', 160);
 		},
 		events: {
 			'change input[name=muted]': 'setMute',
+			'click input[name=soundtest]': 'doSoundTest',
 			'change input[type=range]': 'updateVolume',
 			'keyup input[type=range]': 'updateVolume',
 			'input input[type=range]': 'updateVolume'
@@ -400,6 +402,9 @@
 				break;
 			}
 		},
+                doSoundTest: function (e) {
+                        app.addPopup(SoundTestPopup);
+                },
 		setMute: function (e) {
 			var muted = !!e.currentTarget.checked;
 			Dex.prefs('mute', muted);

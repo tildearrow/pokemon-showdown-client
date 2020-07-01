@@ -715,7 +715,7 @@ function toId() {
 
 			var self = this;
 			var constructSocket = function () {
-				var protocol = (Config.server.port === 443 || Config.server.https) ? 'https' : 'http';
+				var protocol = (location.protocol === "https:") ? 'https' : 'http';
 				Config.server.host = $.trim(Config.server.host);
 				return new SockJS(protocol + '://' + Config.server.host + ':' +
 					Config.server.port + Config.sockjsprefix, [], {timeout: 5 * 60 * 1000});
@@ -2713,6 +2713,52 @@ function toId() {
 			this.close();
 			this.callback(data.result);
 		}
+	});
+
+	this.AudioPopup = Popup.extend({
+		type: 'modal',
+		initialize: function (data) {
+			var buf = '<form>';
+			buf += '<p>Because of <a href="https://webkit.org/blog/7734/auto-play-policy-changes-for-macos/" target="_blank">Safari\'s AutoPlay restrictions</a>, we need to do this manually:</p>';
+			buf += '<p class="buttonbar"><button type="submit"><strong>Allow sounds and music</strong></button> <button name="close">Cancel</button></p>';
+			buf += '</form>';
+			this.$el.html(buf).css('min-width', 500);
+		},
+		submit: function (data) {
+			this.close();
+                        // TODO: play blank music
+                        BattleSound.playLocalEffect("/NonEx");
+                        BattleSound.playLocalEffect("/psc/audio/notification.wav");
+                        this.bgm=BattleSound.loadBgm('/psc/audio/bgm/silence', 5001, 153819, this.bgm);
+                        this.bgm.play();
+                        setTimeout(this.bgm.stop(),600);
+		}
+	});
+
+	this.SoundTestPopup = Popup.extend({
+		type: 'modal',
+                events: {
+                  'click button[name=closeit]': 'doClose'
+                },
+		initialize: function (data) {
+			var buf = '<form>';
+			buf += '<p>Sound Test Form</p>';
+			buf += '<p class="buttonbar"><button type="submit"><strong>Hear something</strong></button><br/><button name="closeit">Done</button></p>';
+			buf += '</form>';
+			this.$el.html(buf).css('min-width', 500);
+                        this.bgm=null;
+		},
+		submit: function (data) {
+                        BattleSound.playLocalEffect("/NonEx");
+                        BattleSound.playLocalEffect("/psc/audio/notification.wav");
+                        this.bgm=BattleSound.loadBgm('/psc/audio/test', 5001, 153819, this.bgm);
+                        this.bgm.play();
+		},
+                doClose: function (e) {
+                  this.bgm=BattleSound.loadBgm('/NonEx', 5001, 153819, this.bgm);
+                  this.bgm.play();
+                  this.close();
+                },
 	});
 
 	var ReplayUploadedPopup = this.ReplayUploadedPopup = Popup.extend({
