@@ -101,7 +101,7 @@ class BattleLog {
 
 		case 'join': case 'j': case 'leave': case 'l': {
 			const user = BattleTextParser.parseNameParts(args[1]);
-			const formattedUser = BattleLog.escapeHTML(user.group + user.name);
+			const formattedUser = user.group + user.name;
 			const isJoin = (args[0].charAt(0) === 'j');
 			if (!this.joinLeave) {
 				this.joinLeave = {
@@ -127,7 +127,7 @@ class BattleLog {
 				buf += `${this.textList(this.joinLeave.leaves)} left`;
 			}
 			this.joinLeave.element.innerHTML = `<small>${BattleLog.escapeHTML(buf)}</small>`;
-			(preempt ? this.preemptElem : this.innerElem).append(this.joinLeave.element);
+			(preempt ? this.preemptElem : this.innerElem).appendChild(this.joinLeave.element);
 			return;
 		}
 
