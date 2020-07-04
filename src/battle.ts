@@ -1281,6 +1281,29 @@ class Battle {
 
 		if (!this.fastForward) this.turnsSinceMoved++;
 
+                var doHurry=false;
+
+                if (this.mySide.active[0]) {
+                  if (this.mySide.active[0].hp<5) {
+                    doHurry=true;
+                  }
+                }
+                if (this.mySide.active[1]) {
+                  if (this.mySide.active[1].hp<5) {
+                    doHurry=true;
+                  }
+                }
+                if (this.mySide.active[2]) {
+                  if (this.mySide.active[2].hp<5) {
+                    doHurry=true;
+                  }
+                }
+                if (doHurry) {
+		  this.scene.setBgm(-4);
+                } else {
+		  this.scene.setBgm(-3);
+                }
+                this.scene.bgm.play();
 		this.scene.incrementTurn();
 
 		if (this.fastForward) {

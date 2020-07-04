@@ -71,6 +71,7 @@ class BattleScene {
 	bgm: BattleBGM | null = null;
 	backdropImage: string = '';
 	bgmNum = 0;
+	oldBgmNum = 56;
 	preloadCache: {[url: string]: HTMLImageElement} = {};
 
 	messagebarOpen = false;
@@ -1475,9 +1476,16 @@ class BattleScene {
 		this.bgmNum = bgmNum;
 
                 if (bgmNum>110 || bgmNum<1) {
-			this.bgm = BattleSound.loadBgm('/psc/audio/bgm/56', 5001, 153819, this.bgm);
+                  if (bgmNum==-4) {
+		    this.bgm = BattleSound.loadBgm('/psc/audio/hurry/hurry'+(1+Math.round(Math.random())), 5001, 153819, this.bgm);
+                  } else if (bgmNum==-3) {
+                    this.bgm = BattleSound.loadBgm('/psc/audio/bgm/'+this.oldBgmNum, 5001, 153819, this.bgm);
+                  } else {
+		    this.bgm = BattleSound.loadBgm('/psc/audio/bgm/56', 5001, 153819, this.bgm);
+                  }
                 } else {
-			this.bgm = BattleSound.loadBgm('/psc/audio/bgm/'+bgmNum, 5001, 153819, this.bgm);
+ 		        this.oldBgmNum = bgmNum;
+			this.bgm = BattleSound.loadBgm('/psc/audio/bgm/'+this.bgmNum, 5001, 153819, this.bgm);
                 }
 	}
 	updateBgm() {
@@ -2668,18 +2676,7 @@ class BattleBGM {
 		if (this.isPlaying) return;
 		this.isPlaying = true;
 		if (BattleSound.muted || !BattleSound.bgmVolume) return;
-		let thisIsFirst = false;
-		for (const bgm of BattleSound.bgm) {
-			if (bgm === this) {
-				thisIsFirst = true;
-			} else if (bgm.isPlaying) {
-				if (!thisIsFirst) return;
-				bgm.sound.pause();
-				break;
-			}
-		}
 		this.sound.setGain(BattleSound.bgmVolume*655.35);
-		this.sound.gotoTrack(0,false);
 		this.sound.play();
 	}
 	pause() {
@@ -2690,6 +2687,7 @@ class BattleBGM {
 	stop() {
 		this.isPlaying = false;
 		this.sound.stop();
+		this.sound.gotoTrack(0,false);
 	}
 	destroy() {
 		this.isPlaying = false;
@@ -2837,8 +2835,7 @@ const BattleSound = new class {
 
 	addBgm(sound: Gapless5, replaceBGM?: BattleBGM | null) {
 		if (replaceBGM) {
-			replaceBGM.sound.stop();
-			replaceBGM.sound = sound;
+                        replaceBGM.isPlaying=false;
 			BattleBGM.update();
 			return replaceBGM;
 		}
