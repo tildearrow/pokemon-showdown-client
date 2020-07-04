@@ -1473,17 +1473,22 @@ class BattleScene {
 	}
 	setBgm(bgmNum: number) {
 		if (this.bgmNum === bgmNum) return;
-		this.bgmNum = bgmNum;
 
                 if (bgmNum>110 || bgmNum<1) {
                   if (bgmNum==-4) {
+		    this.bgmNum = bgmNum;
 		    this.bgm = BattleSound.loadBgm('/psc/audio/hurry/hurry'+(1+Math.round(Math.random())), 5001, 153819, this.bgm);
                   } else if (bgmNum==-3) {
-                    this.bgm = BattleSound.loadBgm('/psc/audio/bgm/'+this.oldBgmNum, 5001, 153819, this.bgm);
+                    if (this.bgmNum != this.oldBgmNum) {
+		      this.bgmNum = this.oldBgmNum;
+                      this.bgm = BattleSound.loadBgm('/psc/audio/bgm/'+this.oldBgmNum, 5001, 153819, this.bgm);
+                    }
                   } else {
+		    this.bgmNum = bgmNum;
 		    this.bgm = BattleSound.loadBgm('/psc/audio/bgm/56', 5001, 153819, this.bgm);
                   }
                 } else {
+		        this.bgmNum = bgmNum;
  		        this.oldBgmNum = bgmNum;
 			this.bgm = BattleSound.loadBgm('/psc/audio/bgm/'+this.bgmNum, 5001, 153819, this.bgm);
                 }
