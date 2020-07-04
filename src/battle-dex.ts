@@ -113,18 +113,6 @@ if (typeof window === 'undefined') {
 	window.exports = window;
 }
 
-// TODO; this won't work anymore due to audio auto-play restrictions
-if (window.soundManager) {
-	soundManager.setup({url: 'https://play.pokemonshowdown.com/swf/'});
-	if (window.Replays) soundManager.onready(window.Replays.soundReady);
-	soundManager.onready(() => {
-		soundManager.createSound({
-			id: 'notif',
-			url: 'https://play.pokemonshowdown.com/audio/notification.wav',
-		});
-	});
-}
-
 // @ts-ignore
 window.nodewebkit = !!(typeof process !== 'undefined' && process.versions && process.versions['node-webkit']);
 
