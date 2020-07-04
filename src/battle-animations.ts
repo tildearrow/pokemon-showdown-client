@@ -1468,13 +1468,13 @@ class BattleScene {
 		this.preloadImage(Dex.resourcePrefix + 'sprites/ani-back/substitute.gif');
 	}
 	rollBgm() {
-		this.setBgm(1 + this.numericId % 69);
+		this.setBgm(1 + this.numericId % 110);
 	}
 	setBgm(bgmNum: number) {
 		if (this.bgmNum === bgmNum) return;
 		this.bgmNum = bgmNum;
 
-                if (bgmNum>68 || bgmNum<1) {
+                if (bgmNum>110 || bgmNum<1) {
 			this.bgm = BattleSound.loadBgm('/psc/audio/bgm/56', 5001, 153819, this.bgm);
                 } else {
 			this.bgm = BattleSound.loadBgm('/psc/audio/bgm/'+bgmNum, 5001, 153819, this.bgm);
@@ -1495,7 +1495,7 @@ class BattleScene {
 		);
 		if (nowPlaying) {
 			if (!this.bgm) this.rollBgm();
-			this.bgm!.play();
+			this.bgm.play();
 		} else if (this.bgm) {
 			this.bgm.pause();
 		}
@@ -2679,6 +2679,7 @@ class BattleBGM {
 			}
 		}
 		this.sound.setGain(BattleSound.bgmVolume*655.35);
+		this.sound.gotoTrack(0,false);
 		this.sound.play();
 	}
 	pause() {
@@ -2689,7 +2690,6 @@ class BattleBGM {
 	stop() {
 		this.isPlaying = false;
 		this.sound.stop();
-		this.sound.gotoTrack(0,false);
 	}
 	destroy() {
 		this.isPlaying = false;
@@ -2804,6 +2804,36 @@ const BattleSound = new class {
                   if (s.paused) s.play();
                 }
 	}
+
+	loadEndEffect(url: string) {
+                if (this.effectCache['endbgm']) {
+                    this.effectCache['endbgm'].src = url;
+                    this.effectCache['endbgm'].load();
+                    this.effectCache['endbgm'].volume=this.effectVolume/100;
+                } else {
+		  try {
+                    this.effectCache['endbgm'] = new Audio(url);
+                    this.effectCache['endbgm'].volume=this.effectVolume/100;
+		  } catch {}
+   		  if (!this.effectCache['endbgm']) {
+		    this.effectCache['endbgm'] = this.soundPlaceholder;
+		  }
+                }
+		return this.effectCache['endbgm'];
+	}
+	playEndEffect(url: string) {
+		if (!this.muted) {
+                  var s=this.loadEndEffect(url);
+                  s.volume=this.effectVolume/100;
+                  if (s.paused) s.play();
+                }
+	}
+        stopEndEffect() {
+          if (this.effectCache['endbgm']) {
+            this.effectCache['endbgm'].pause();
+            this.effectCache['endbgm'].currentTime=0;
+          }
+        }
 
 	addBgm(sound: Gapless5, replaceBGM?: BattleBGM | null) {
 		if (replaceBGM) {

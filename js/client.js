@@ -2729,6 +2729,7 @@ function toId() {
                         // TODO: play blank music
                         BattleSound.playLocalEffect("/NonEx");
                         BattleSound.playLocalEffect("/psc/audio/notification.wav");
+                        BattleSound.playEndEffect("/psc/audio/bgm/silence_intro.mp3");
                         this.bgm=BattleSound.loadBgm('/psc/audio/bgm/silence', 5001, 153819, this.bgm);
                         this.bgm.play();
                         setTimeout(this.bgm.stop(),600);

@@ -1162,7 +1162,10 @@ class Battle {
 		this.paused = true;
 		if (this.playbackState !== Playback.Seeking) {
 			this.playbackState = Playback.Uninitialized;
-			if (!dontResetSound) this.scene.resetBgm();
+			if (!dontResetSound) {
+                          this.scene.resetBgm();
+                          BattleSound.stopEndEffect();
+                        }
 		}
 		this.resetTurnsSinceMoved();
 		this.nextActivity();
@@ -1178,6 +1181,8 @@ class Battle {
 		this.yourSide = null!;
 		this.p1 = null!;
 		this.p2 = null!;
+
+                BattleSound.stopEndEffect();
 	}
 
 	log(args: Args, kwArgs?: KWArgs, preempt?: boolean) {
@@ -1232,10 +1237,19 @@ class Battle {
 	}
 	winner(winner?: string) {
 		this.log(['win', winner || '']);
+                if (winner == undefined) {
+                  BattleSound.playEndEffect("/psc/audio/draw/"+(1+Math.floor(Math.random()*2))+".mp3");
+
+                } else if (this.sides[0].name == winner) {
+                  BattleSound.playEndEffect("/psc/audio/win/"+(1+Math.floor(Math.random()*11))+".mp3");
+                } else {
+                  BattleSound.playEndEffect("/psc/audio/lose/"+(1+Math.floor(Math.random()*4))+".mp3");
+                }
 		this.ended = true;
 	}
 	prematureEnd() {
 		this.log(['message', 'This replay ends here.']);
+                BattleSound.playEndEffect("/psc/audio/draw/1.mp3");
 		this.ended = true;
 	}
 	endLastTurn() {
