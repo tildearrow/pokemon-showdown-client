@@ -1,34 +1,23 @@
-Pokémon Showdown Client
-========================================================================
+# Pokémon Showdown Client with sound fixes
 
-Navigation: [Website][1] | [Server repository][2] | **Client repository** | [Dex repository][3]
+## Introduction
 
-  [1]: http://pokemonshowdown.com/
-  [2]: https://github.com/Zarel/Pokemon-Showdown
-  [3]: https://github.com/Zarel/Pokemon-Showdown-Dex
+this is a modified version of the official Pokémon Showdown client, with fixes mostly on the sound side.
 
-Introduction
-------------------------------------------------------------------------
+this fork drops SoundManager2 entirely, and just uses Gapless-5 and the official audio APIs for it.
+it also adds more music (of which you have to provide yourself), and specific songs for winning/losing/tie conditions.
 
-This is a repository for most of the client code for Pokémon Showdown.
+oh and sound effects! (again, you have to provide the sound effects yourself).
 
-This is what runs `play.pokemonshowdown.com`.
+## Testing
 
-**WARNING: You probably want the [Pokémon Showdown server][4]**, if you're
-setting up a server.
+you **have** to build the whole thing.
 
-  [4]: https://github.com/Zarel/Pokemon-Showdown
+use `./build full`. yeah. building just the main part won't work.
 
-Testing
-------------------------------------------------------------------------
+you need node and git, of course.
 
-Client testing now requires a build step! Install the latest Node.js (we
-require v10 or later) and Git, and run `node build` (on Windows) or `./build`
-(on other OSes) to build.
-
-You can make and test client changes simply by building after each change,
-and opening `testclient.html`. This will allow you to test changes to the
-client without setting up your own login server.
+after finishing, go to `testclient.html`.
 
 ### Test keys
 
@@ -64,6 +53,8 @@ serving the files locally first (ie. run `npx http-server` from the
 directory this README is in, then navigate in your browser to
 `http://localhost:8080/testclient.html?~~localhost:8000`).
 
+**NOTE 2**: this version **mandatorily** uses SSL/TLS for connections, regardless of server. therefore you have to use the SSL port, if any.
+
 ### Limitations
 
 Even with a test key, the following things will fail in `testclient.html`:
@@ -74,26 +65,38 @@ Even with a test key, the following things will fail in `testclient.html`:
 
 Everything else can be tested.
 
-Warning
-------------------------------------------------------------------------
+furthermore, I am not sure if this is true anymore. maybe the registering thing, but I and this other tester are able to log in using their respective accounts without any problems.
 
-This repository is not "batteries included". It does NOT include instructions
-to run a full Pokémon Showdown login server, and we will not provide them.
-Please do not ask for help on this; you will be turned away.
+## Warning
 
-If you make a mistake hosting a login server, your users' passwords can get
-stolen, so we do not want anyone to host a login server unless they can
-figure out how to do it without help.
+you have to provide the songs, sound effects and my version of the Gapless-5 code yourself.
+here is a sample of the tree:
 
-It also doesn't include several resource files (namely, the `/audio/` and
-`/sprites/` directories) for size reasons.
+```
+audio/
+  bgm/ <-- songs go here, in tildearrow's loop format (see below).
+    silence_intro.wav <-- 0.5 seconds of silence, used when running in Safari
+    silence_intro.ogg <-- same in .ogg format
+    silence_intro.mp3 <-- same in .mp3 format
+    silence_loop.wav
+    silence_loop.ogg
+    silence_loop.mp3
+  draw/ <-- draw songs go here
+  hurry/ <-- "you're in a pinch" goes here. same thing as before.
+  lose/ <-- losing songs go here
+  moves/ <-- attack sound effects go here
+  win/ <-- win songs go here
+  notification.wav <-- from http://play.pokemonshowdown.com/audio/notification.wav, used when running in Safari
+  test_intro.wav <-- the test song, used for the "Sound test" option.
+  test_intro.ogg <-- same in .ogg format
+  test_intro.mp3 <-- same in .mp3 format
+  test_loop.wav
+  test_loop.ogg
+  test_loop.mp3
+Gapless-5/ <-- clone of https://github.com/tildearrow/Gapless-5
+```
 
-On the other hand, as long as you don't want to run your own login server,
-this repository contains everything you need to test changes to the client;
-just see the "Testing" section above.
-
-License
-------------------------------------------------------------------------
+## License
 
 Pokémon Showdown's client is distributed under the terms of the [AGPLv3][6].
 
