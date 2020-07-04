@@ -509,10 +509,7 @@ function toId() {
 
 				if (showNotification !== false && (self.popups.length || !self.focused) && window.Notification) {
 					self.rooms[''].requestNotifications();
-					var disconnect = new Notification("Disconnected!", {lang: 'en', body: "You have been disconnected from Pokémon Showdown."});
-					disconnect.onclick = function (e) {
-						window.focus();
-					};
+					self.rooms[''].notifyOnce("Disconnected", "You have been disconnected from Pokémon Showdown.", 'disconnected');
 				}
 
 				self.rooms[''].updateFormats();
@@ -1277,7 +1274,8 @@ function toId() {
 			if (serverid && serverid !== 'showdown') id = serverid + '-' + id;
 			$.post(app.user.getActionPHP() + '?act=uploadreplay', {
 				log: data.log,
-				id: id
+				password: data.password || '',
+				id: id,
 			}, function (data) {
 				if (silent) return;
 				var sData = data.split(':');
@@ -1311,7 +1309,7 @@ function toId() {
 				) && this.className !== 'no-panel-intercept') {
 					if (!e.cmdKey && !e.metaKey && !e.ctrlKey) {
 						var target = this.pathname.substr(1);
-						var shortLinks = /^(rooms?suggestions?|suggestions?|adminrequests?|bugs?|bugreports?|rules?|faq|credits?|news|privacy|contact|dex|insecure|replays?|forgotpassword)$/;
+						var shortLinks = /^(rooms?suggestions?|suggestions?|adminrequests?|bugs?|bugreports?|rules?|faq|credits?|news|privacy|contact|dex|insecure|replays?|forgotpassword|devdiscord)$/;
 						if (target === 'appeal' || target === 'appeals') target = 'view-help-request--appeal';
 						if (target === 'report') target = 'view-help-request--report';
 						if (isReplayLink) {
@@ -2416,7 +2414,7 @@ function toId() {
 			order: 10001
 		},
 		'&': {
-			name: "Leader (&amp;)",
+			name: "Administrator (&amp;)",
 			type: 'leadership',
 			order: 10002
 		},
