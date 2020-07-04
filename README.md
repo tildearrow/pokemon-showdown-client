@@ -98,6 +98,35 @@ Gapless-5/ <-- clone of https://github.com/tildearrow/Gapless-5
 
 to provide you with a head start, the silence, test (except wav) and notification files are included.
 
+for the songs, the format goes like this: `NUMBER_intro.EXT` and `NUMBER_loop.EXT`. `NUMBER` goes from 1 to 110 (you can change this but i'll tell you how later).
+
+for the files in `draw`, `lose` and `win`, this is the format: `NUMBER.EXT`. `NUMBER` goes from 1 to:
+
+- 2 in `draw`
+- 4 in `lose`
+- 11 in `win`
+
+for the files in `moves`, this is the format: `MOVE.EXT`. `MOVE` is a Pokémon move name, lowercase without spaces.
+
+for the files in `hurry`, provide:
+
+- hurry1\_intro.EXT
+- hurry1\_loop.EXT
+- hurry2\_intro.EXT
+- hurry2\_loop.EXT
+
+preferably provide "You're in a Pinch!" in hurry1.
+
+for all cases, `EXT` is `wav`, `ogg` and `mp3` (for Safari).
+
+## tildearrow's loop format
+
+this is my format for looping songs. it is very simple.
+
+a song consists of two files, `SONGNAME_intro` and `SONGNAME_loop` (`SONGNAME` being the file name).
+
+the intro file contains the beginning of the song, and the loop file contains the looping part. the extension/format can be any, but the ones that preserve exact length in samples are preferred.
+
 ## License
 
 Pokémon Showdown's client is distributed under the terms of the [AGPLv3][6].
