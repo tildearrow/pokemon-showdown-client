@@ -96,6 +96,8 @@ audio/
 Gapless-5/ <-- clone of https://github.com/tildearrow/Gapless-5
 ```
 
+to provide you with a head start, the silence, test (except wav) and notification files are included.
+
 ## License
 
 Pokémon Showdown's client is distributed under the terms of the [AGPLv3][6].
@@ -107,3 +109,7 @@ If you're doing _anything_ else other than forking, _especially_ if you want to 
   [6]: http://www.gnu.org/licenses/agpl-3.0.html
 
 **WARNING:** This is **NOT** the same license as Pokémon Showdown's server.
+
+## Footnote
+
+the test song is my saw wave rendition of [bth.cracktro1](http://modarchive.org/index.php?request=view_by_moduleid&query=116014) by [blackthorne/TRSI](https://www.exotica.org.uk/wiki/Tristar_Red_Sector_Inc#Crack_Intro_03_.281993.2C_ECS_Intro.29).
