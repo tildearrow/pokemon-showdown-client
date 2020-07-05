@@ -2709,6 +2709,7 @@ class BattleBGM {
 					bgm.sound.pause();
 				} else {
 					bgm.sound.setGain(BattleSound.bgmVolume*655.35);
+					bgm.sound.play();
 				}
 				break;
 			}
