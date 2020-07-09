@@ -1281,29 +1281,6 @@ class Battle {
 
 		if (!this.fastForward) this.turnsSinceMoved++;
 
-                var doHurry=false;
-
-                if (this.mySide.active[0]) {
-                  if (this.mySide.active[0].hp<5) {
-                    doHurry=true;
-                  }
-                }
-                if (this.mySide.active[1]) {
-                  if (this.mySide.active[1].hp<5) {
-                    doHurry=true;
-                  }
-                }
-                if (this.mySide.active[2]) {
-                  if (this.mySide.active[2].hp<5) {
-                    doHurry=true;
-                  }
-                }
-                if (doHurry) {
-		  this.scene.setBgm(-4);
-                } else {
-		  this.scene.setBgm(-3);
-                }
-                this.scene.bgm.play();
 		this.scene.incrementTurn();
 
 		if (this.fastForward) {
@@ -2980,6 +2957,36 @@ class Battle {
 			output.hp = 0;
 			output.fainted = true;
 		}
+
+                console.log("parsing... health!");
+                var doHurry=false;
+
+                if (this.mySide.active[0]!=null) {
+                  console.log("side 0: "+this.mySide.active[0].hp);
+                  if (this.mySide.active[0].hp<5 && this.mySide.active[0].hp>0) {
+                    doHurry=true;
+                  }
+                }
+                if (this.mySide.active[1]!=null) {
+                  console.log("side 1: "+this.mySide.active[1].hp);
+                  if (this.mySide.active[1].hp<5 && this.mySide.active[1].hp>0) {
+                    doHurry=true;
+                  }
+                }
+                if (this.mySide.active[2]!=null) {
+                  console.log("side 2: "+this.mySide.active[2].hp);
+                  if (this.mySide.active[2].hp<5 && this.mySide.active[2].hp>0) {
+                    doHurry=true;
+                  }
+                }
+                if (doHurry) {
+                  console.log("hurrying");
+		  this.scene.setBgm(-4);
+                } else {
+                  console.log("not hurrying");
+		  this.scene.setBgm(-3);
+                }
+                this.scene.bgm.play();
 		return output;
 	}
 	parsePokemonId(pokemonid: string) {

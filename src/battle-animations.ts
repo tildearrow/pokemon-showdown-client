@@ -71,7 +71,7 @@ class BattleScene {
 	bgm: BattleBGM | null = null;
 	backdropImage: string = '';
 	bgmNum = 0;
-	oldBgmNum = 56;
+	oldBgmNum = -1;
 	preloadCache: {[url: string]: HTMLImageElement} = {};
 
 	messagebarOpen = false;
@@ -1479,13 +1479,17 @@ class BattleScene {
 		    this.bgmNum = bgmNum;
 		    this.bgm = BattleSound.loadBgm('/psc/audio/hurry/hurry'+(1+Math.round(Math.random())), 5001, 153819, this.bgm);
                   } else if (bgmNum==-3) {
-                    if (this.bgmNum != this.oldBgmNum) {
-		      this.bgmNum = this.oldBgmNum;
-                      this.bgm = BattleSound.loadBgm('/psc/audio/bgm/'+this.oldBgmNum, 5001, 153819, this.bgm);
+                    if (this.oldBgmNum != -1) {
+                      if (this.bgmNum != this.oldBgmNum) {
+  		      this.bgmNum = this.oldBgmNum;
+                        this.bgm = BattleSound.loadBgm('/psc/audio/bgm/'+this.oldBgmNum, 5001, 153819, this.bgm);
+                        console.error("this music is not set, you know");
+                      }
                     }
                   } else {
 		    this.bgmNum = bgmNum;
 		    this.bgm = BattleSound.loadBgm('/psc/audio/bgm/56', 5001, 153819, this.bgm);
+                    console.error("this music is not set");
                   }
                 } else {
 		        this.bgmNum = bgmNum;
