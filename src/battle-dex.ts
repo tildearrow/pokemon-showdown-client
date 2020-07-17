@@ -867,9 +867,26 @@ const Dex = new class implements ModdedDex {
 	}
 
 	getTypeIcon(type: string, b?: boolean) { // b is just for utilichart.js
-		if (!type) return '';
+		type = this.getType(type).name;
+		if (!type) type = '???';
 		let sanitizedType = type.replace(/\?/g, '%3f');
-		return '<img src="' + Dex.resourcePrefix + 'sprites/types/' + sanitizedType + '.png" alt="' + type + '" height="14" width="32"' + (b ? ' class="b"' : '') + ' />';
+		return `<img src="${Dex.resourcePrefix}sprites/types/${sanitizedType}.png" alt="${type}" height="14" width="32" class="pixelated${b ? ' b' : ''}" />`;
+	}
+
+	getCategoryIcon(category: string) {
+		const categoryID = toID(category);
+		let sanitizedCategory = '';
+		switch (categoryID) {
+		case 'physical':
+		case 'special':
+		case 'status':
+			sanitizedCategory = categoryID.charAt(0).toUpperCase() + categoryID.slice(1);
+			break;
+		default:
+			sanitizedCategory = 'undefined';
+			break;
+		}
+		return `<img src="${Dex.resourcePrefix}sprites/categories/${sanitizedCategory}.png" alt="${sanitizedCategory}" height="14" width="32" class="pixelated" />`;
 	}
 
 	getPokeballs() {

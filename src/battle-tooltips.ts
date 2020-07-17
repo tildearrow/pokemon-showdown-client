@@ -587,10 +587,12 @@ class BattleTooltips {
 						maxMove = this.battle.dex.getMove(BattleTooltips.maxMoveTable['Psychic']);
 					}
 				}
+				const basePower = ['gmaxdrumsolo', 'gmaxfireball', 'gmaxhydrosnipe'].includes(maxMove.id) ?
+					maxMove.basePower : move.maxMove.basePower;
 				move = new Move(maxMove.id, maxMove.name, {
 					...maxMove,
 					category: move.category,
-					basePower: move.maxMove!.basePower,
+					basePower,
 				});
 			}
 		}
@@ -601,7 +603,7 @@ class BattleTooltips {
 		let [moveType, category] = this.getMoveType(move, value);
 
 		text += Dex.getTypeIcon(moveType);
-		text += ` <img src="${Dex.resourcePrefix}sprites/categories/${category}.png" alt="${category}" /></h2>`;
+		text += ` ${Dex.getCategoryIcon(category)}</h2>`;
 
 		// Check if there are more than one active Pokémon to check for multiple possible BPs.
 		let showingMultipleBasePowers = false;

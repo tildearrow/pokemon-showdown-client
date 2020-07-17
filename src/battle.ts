@@ -1076,9 +1076,9 @@ class Battle {
 	id = '';
 	roomid = '';
 	hardcoreMode = false;
-	ignoreNicks = Dex.prefs('ignorenicks');
-	ignoreOpponent = false;
-	ignoreSpects = false;
+	ignoreNicks = !!Dex.prefs('ignorenicks');
+	ignoreOpponent = !!Dex.prefs('ignoreopp');
+	ignoreSpects = !!Dex.prefs('ignorespects');
 	debug = false;
 	joinButtons = false;
 
