@@ -90,6 +90,7 @@ class BattleScene {
 
 	constructor(battle: Battle, $frame: JQuery, $logFrame: JQuery) {
 		this.battle = battle;
+
 		$frame.addClass('battle');
 		this.$frame = $frame;
 		this.log = new BattleLog($logFrame[0] as HTMLDivElement, this);
@@ -2669,6 +2670,7 @@ Object.assign($.easing, {
 	},
 });
 
+<<<<<<< HEAD
 // TODO: please fix looping. perhaps use howler.js.
 class BattleBGM {
 	/**
@@ -2919,6 +2921,8 @@ if (typeof PS === 'object') {
 	});
 }
 
+=======
+>>>>>>> 8ae2c7141579fcc89e7d9e83208866a53b604b27
 interface AnimData {
 	anim(scene: BattleScene, args: PokemonSprite[]): void;
 	prepareAnim?(scene: BattleScene, args: PokemonSprite[]): void;

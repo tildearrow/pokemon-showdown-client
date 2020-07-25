@@ -56,7 +56,7 @@
 			this.$('.mainmenu').html(buf);
 
 			// right menu
-			if (document.location.hostname === 'play.pokemonshowdown.com') {
+			if (document.location.hostname === Config.routes.client) {
 				this.$('.rightmenu').html('<div class="menugroup"><p><button class="button mainmenu1 onlineonly disabled" name="joinRoom" value="rooms">Join chat</button></p></div>');
 			} else {
 				this.$('.rightmenu').html('<div class="menugroup"><p><button class="button mainmenu1 onlineonly disabled" name="joinRoom" value="lobby">Join lobby chat</button></p></div>');
@@ -127,7 +127,7 @@
 		addNews: function () {
 			var self = this;
 			$.ajax({
-				url: "https://pokemonshowdown.com/news.json",
+				url: "https://" + Config.routes.root + "/news.json",
 				dataType: "json",
 				success: function (data) {
 					var html = '';
@@ -773,27 +773,16 @@
 			}
 
 			if (format) {
-				var formatParts = format.split('@@@');
+				var formatParts = format.split('@@@', 2);
 				formatParts[0] = toID(formatParts[0]);
 				if (!formatParts[0].startsWith('gen')) formatParts[0] = 'gen8' + formatParts[0];
-				format = formatParts[1] ? formatParts[0] + '@@@' + formatParts[1] : formatParts[0];
-			}
-
-			var teamIndex;
-			if (Storage.teams && team) {
-				team = toID(team);
-				for (var i = 0; i < Storage.teams.length; i++) {
-					if (team === toID(Storage.teams[i].name || '')) {
-						teamIndex = i;
-						break;
-					}
-				}
+				format = formatParts.length > 1 ? formatParts[0] + '@@@' + formatParts[1] : formatParts[0];
 			}
 
 			$challenge = this.openChallenge(name);
 			var buf = '<form class="battleform"><p>Challenge ' + BattleLog.escapeHTML(name) + '?</p>';
 			buf += '<p><label class="label">Format:</label>' + this.renderFormats(format) + '</p>';
-			buf += '<p><label class="label">Team:</label>' + this.renderTeams(format, teamIndex) + '</p>';
+			buf += '<p><label class="label">Team:</label>' + this.renderTeams(format) + '</p>';
 			buf += '<p><label class="checkbox"><input type="checkbox" name="private" ' + (Storage.prefs('disallowspectators') ? 'checked' : '') + ' /> <abbr title="You can still invite spectators by giving them the URL or using the /invite command">Don\'t allow spectators</abbr></label></p>';
 			buf += '<p class="buttonbar"><button name="makeChallenge"><strong>Challenge</strong></button> <button name="dismissChallenge">Cancel</button></p></form>';
 			$challenge.html(buf);

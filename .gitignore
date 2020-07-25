@@ -3,6 +3,7 @@
 /index.php
 /index.html
 /preactalpha.html
+/crossprotocol.html
 /data/*
 node_modules/
 eslint-cache/
@@ -18,6 +19,7 @@ package-lock.json
 /js/battle-choices.js
 /js/battle-text-parser.js
 /js/battle-dex.js
+/js/battle-sound.js
 /js/battle-dex-data.js
 /js/battle-animations-moves.js
 /js/battle-animations.js
@@ -38,6 +40,7 @@ package-lock.json
 /js/panel-teambuilder-team.js
 /js/panel-teamdropdown.js
 /js/panel-battle.js
+/js/replay-embed.js
 
 /replays/caches/
 /replays/replay-config.inc.php

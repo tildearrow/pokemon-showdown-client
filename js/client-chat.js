@@ -447,7 +447,7 @@
 				var self = this;
 				var challenge = function (targets) {
 					target = toID(targets[0]);
-					self.challengeData = {userid: target, format: targets[1] || '', team: targets[2] || ''};
+					self.challengeData = {userid: target, format: targets.length > 1 ? targets.slice(1).join(',') : '', team: ''};
 					app.on('response:userdetails', self.challengeUserdetails, self);
 					app.send('/cmd userdetails ' + target);
 				};
@@ -912,7 +912,7 @@
 					var userid = toID(targets[0]);
 					var registered = app.user.get('registered');
 					if (registered && registered.userid === userid) {
-						buffer += '<tr><td colspan="8" style="text-align:right"><a href="//pokemonshowdown.com/users/' + userid + '">Reset W/L</a></tr></td>';
+						buffer += '<tr><td colspan="8" style="text-align:right"><a href="//' + Config.routes.users + '/' + userid + '">Reset W/L</a></tr></td>';
 					}
 					buffer += '</table></div>';
 					self.add('|raw|' + buffer);
@@ -1005,9 +1005,13 @@
 			// documentation of client commands
 			case 'help':
 				switch (toID(target)) {
+				case 'chal':
+				case 'chall':
 				case 'challenge':
 					this.add('/challenge - Open a prompt to challenge a user to a battle.');
 					this.add('/challenge [user] - Challenge the user [user] to a battle.');
+					this.add('/challenge [user], [format] - Challenge the user [user] to a battle in the specified [format].');
+					this.add('/challenge [user], [format] @@@ [Added Rule], [!Removed Rule], [-Banned thing], [*Restricted thing], [+Unbanned/unrestricted thing] - Challenge the user [user] to a battle in the specified [format] with the custom rules added on.');
 					return false;
 				case 'accept':
 					this.add('/accept - Accept a challenge if only one is pending.');
@@ -1275,9 +1279,7 @@
 			if (autoscroll) {
 				this.$chatFrame.scrollTop(this.$chat.height());
 			}
-			if (!app.focused && !Dex.prefs('mute') && Dex.prefs('notifvolume')) {
-				soundManager.getSoundById('notif').setVolume(Dex.prefs('notifvolume')).play();
-			}
+			if (!app.focused) app.playNotificationSound();
 		},
 		addRow: function (line) {
 			var name, name2, silent;
@@ -1382,9 +1384,7 @@
 
 				case 'notify':
 					if (row[3] && !this.getHighlight(row[3])) return;
-					if (!Dex.prefs('mute') && Dex.prefs('notifvolume')) {
-						soundManager.getSoundById('notif').setVolume(Dex.prefs('notifvolume')).play();
-					}
+					app.playNotificationSound();
 					this.notifyOnce(row[1], row[2], 'highlight');
 					break;
 
@@ -1392,9 +1392,7 @@
 					var notifyOnce = row[4] !== '!';
 					if (!notifyOnce) row[4] = '';
 					if (row[4] && !this.getHighlight(row[4])) return;
-					if (!this.notifications && !Dex.prefs('mute') && Dex.prefs('notifvolume')) {
-						soundManager.getSoundById('notif').setVolume(Dex.prefs('notifvolume')).play();
-					}
+					if (!this.notifications) app.playNotificationSound();
 					this.notify(row[2], row[3], row[1], notifyOnce);
 					break;
 
@@ -1651,9 +1649,7 @@
 			}
 
 			if (mayNotify && isHighlighted) {
-				if (!Dex.prefs('mute') && Dex.prefs('notifvolume')) {
-					soundManager.getSoundById('notif').setVolume(Dex.prefs('notifvolume')).play();
-				}
+				app.playNotificationSound();
 				var $lastMessage = this.$chat.children().last();
 				var notifyTitle = "Mentioned by " + name + (this.id === 'lobby' ? '' : " in " + this.title);
 				var notifyText = $lastMessage.html().indexOf('<span class="spoiler">') >= 0 ? '(spoiler)' : $lastMessage.children().last().text();
