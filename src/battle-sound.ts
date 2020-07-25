@@ -129,6 +129,18 @@ const BattleSound = new class {
 		}
 	}
 
+        playLocalEffect(url: string) {
+          alert("TODO: local effects");
+        }
+
+        playEndEffect(url: string) {
+          alert("TODO: end effect");
+        }
+
+        stopEndEffect() {
+          alert("TODO: stop end effect");
+        }
+
 	/** loopstart and loopend are in milliseconds */
 	loadBgm(url: string, loopstart: number, loopend: number, replaceBGM?: BattleBGM | null) {
 		if (replaceBGM) this.deleteBgm(replaceBGM);
