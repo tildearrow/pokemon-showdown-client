@@ -4,7 +4,14 @@
 
 this is a modified version of the official Pokémon Showdown client, with fixes mostly on the sound side.
 
-this fork drops SoundManager2 entirely, and just uses Gapless-5 and the official audio APIs for it.
+quoting Zarel:
+
+> The main complicated thing we do with sound is loop music with an intro.
+> This is unfortunately not supported by ANY sound library out there
+> (I had to manually add support for it myself to soundManager!)
+
+this fork uses Gapless-5 for music, which does exactly what is mentioned above (proper looping).
+
 it also adds more music (of which you have to provide yourself), and specific songs for winning/losing/tie conditions.
 
 oh and sound effects! (again, you have to provide the sound effects yourself).
