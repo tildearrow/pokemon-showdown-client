@@ -15,8 +15,8 @@ if (!fs.existsSync('data/pokemon-showdown')) {
 }
 
 process.stdout.write("Syncing data from Git repository... ");
-child_process.execSync('git pull', {cwd: 'data/pokemon-showdown'});
-child_process.execSync('npm run build', {cwd: 'data/pokemon-showdown'});
+//child_process.execSync('git pull', {cwd: 'data/pokemon-showdown'});
+//child_process.execSync('npm run build', {cwd: 'data/pokemon-showdown'});
 console.log("DONE");
 
 const Dex = require('../data/pokemon-showdown/.sim-dist/dex').Dex;

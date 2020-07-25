@@ -87,8 +87,7 @@ const BattleSound = new class {
 		if (this.soundCache[url]) return this.soundCache[url];
 		try {
 			const sound = document.createElement('audio');
-                        console.log("SOURCE URL: "+url);
-			sound.src = 'https://' + 'tildearrow.zapto.org' + '/' + url + '_loop.ogg';
+			sound.src = '//' + location.host + url;
 			sound.volume = this.effectVolume / 100;
 			this.soundCache[url] = sound;
 			return sound;
@@ -109,8 +108,17 @@ const BattleSound = new class {
 	}
 
         playLocalEffect(url: string) {
-          console.warn("TODO: local effects");
+          this.playLocalSound(url, this.muted ? 0 : this.effectVolume);
         }
+
+	playLocalSound(url: string, volume: number) {
+		if (!volume) return;
+		const effect = this.getLocalSound(url);
+		if (effect) {
+			effect.volume = volume / 100;
+			effect.play();
+		}
+	}
 
         playEndEffect(url: string) {
           console.warn("TODO: end effect");
