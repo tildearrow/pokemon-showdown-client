@@ -2979,14 +2979,18 @@ class Battle {
                     doHurry=true;
                   }
                 }
-                if (doHurry) {
-                  console.log("hurrying");
-		  this.scene.setBgm(-4);
+                if (this.scene.bgm != null) {
+                  if (doHurry) {
+                    console.log("hurrying");
+		    this.scene.setBgm(-4);
+                  } else {
+                    console.log("not hurrying");
+		    this.scene.setBgm(-3);
+                  }
+                  this.scene.bgm.play();
                 } else {
-                  console.log("not hurrying");
-		  this.scene.setBgm(-3);
+                  console.log("bgm is null. skipping.");
                 }
-                this.scene.bgm.play();
 		return output;
 	}
 	parsePokemonId(pokemonid: string) {
