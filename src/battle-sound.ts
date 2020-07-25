@@ -1,97 +1,63 @@
 
+// TODO: please fix looping. perhaps use howler.js.
 class BattleBGM {
-	/**
-	 * May be shared with other BGM objects: every battle has its own BattleBGM
-	 * object, but two battles with the same music will have the same HTMLAudioElement
-	 * object.
-	 */
-	sound?: HTMLAudioElement;
-	url: string;
-	timer: number | undefined = undefined;
-	loopstart: number;
-	loopend: number;
-	/**
-	 * When multiple battles with BGM are open, they will be `isPlaying`, but only the
-	 * first one will be `isActuallyPlaying`. In addition, muting volume or setting
-	 * BGM volume to 0 will set `isActuallyPlaying` to false.
-	 */
-	isPlaying = false;
-	isActuallyPlaying = false;
-	constructor(url: string, loopstart: number, loopend: number) {
-		this.url = url;
-		this.loopstart = loopstart;
-		this.loopend = loopend;
-	}
-	play() {
-		if (this.sound) this.sound.currentTime = 0;
-		this.resume();
-	}
-	resume() {
-		this.isPlaying = true;
-		this.actuallyResume();
-	}
-	pause() {
-		this.isPlaying = false;
-		this.actuallyPause();
-		BattleBGM.update();
-	}
-	stop() {
-		this.pause();
-		if (this.sound) this.sound.currentTime = 0;
-	}
-	destroy() {
-		BattleSound.deleteBgm(this);
-		this.pause();
-	}
-
-	actuallyResume() {
-		if (this !== BattleSound.currentBgm()) return;
-		if (this.isActuallyPlaying) return;
-
-		if (!this.sound) this.sound = BattleSound.getSound(this.url);
-		if (!this.sound) return;
-		this.isActuallyPlaying = true;
-		this.sound.volume = BattleSound.bgmVolume / 100;
-		this.sound.play();
-		this.updateTime();
-	}
-	actuallyPause() {
-		if (!this.isActuallyPlaying) return;
-		this.isActuallyPlaying = false;
-		this.sound!.pause();
-		this.updateTime();
-	}
-	/**
-	 * Handles the hard part of looping the sound
-	 */
-	updateTime() {
-		clearTimeout(this.timer);
-		this.timer = undefined;
-		if (this !== BattleSound.currentBgm()) return;
-		if (!this.sound) return;
-
-		const progress = this.sound.currentTime * 1000;
-		if (progress > this.loopend - 1000) {
-			this.sound.currentTime -= (this.loopend - this.loopstart) / 1000;
-		}
-
-		this.timer = setTimeout(() => {
-			this.updateTime();
-		}, Math.max(this.loopend - progress, 1));
-	}
-
-	static update() {
-		const current = BattleSound.currentBgm();
-		for (const bgm of BattleSound.bgm) {
-			if (bgm.isPlaying) {
-				if (bgm === current) {
-					bgm.actuallyResume();
-				} else {
-					bgm.actuallyPause();
-				}
-			}
-		}
-	}
+       /**
+        * May be shared with other BGM objects: every battle has its own BattleBGM
+        * object, but two battles with the same music will have the same SMSound- erm Audio
+        * object.
+        */
+       sound: Gapless5;
+       isPlaying = false;
+       constructor(url: string) {
+               this.url = url;
+               let ext = ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) ? '.mp3' : '.ogg';
+               //this.sound = sound;
+               this.sound = new Gapless5("gapless5-block", {
+                          loop: true,
+                          tracks: [url+"_intro"+ext, url+"_loop"+ext],
+                        });
+       }
+       play() {
+               if (this.isPlaying) return;
+               this.isPlaying = true;
+               if (BattleSound.muted || !BattleSound.bgmVolume) return;
+               this.sound.setGain(BattleSound.bgmVolume*655.35);
+               this.sound.play();
+       }
+       pause() {
+               this.isPlaying = false;
+               this.sound.pause();
+               BattleBGM.update();
+       }
+       resume() {
+               this.play();
+       }
+       stop() {
+               this.isPlaying = false;
+               this.sound.stop();
+               this.sound.gotoTrack(0,false);
+       }
+       destroy() {
+               this.isPlaying = false;
+               this.sound.stop();
+               this.sound.gotoTrack(0,false);
+               const soundIndex = BattleSound.bgm.indexOf(this);
+               if (soundIndex >= 0) BattleSound.bgm.splice(soundIndex, 1);
+               BattleBGM.update();
+       }
+       static update() {
+               for (const bgm of BattleSound.bgm) {
+                       if (bgm.isPlaying) {
+                               if (BattleSound.muted || !BattleSound.bgmVolume) {
+                                       bgm.sound.pause();
+                               } else {
+                                       bgm.sound.setGain(BattleSound.bgmVolume*655.35);
+                                       bgm.sound.play();
+                               }
+                               break;
+                       }
+               }
+       }
 }
 
 const BattleSound = new class {
@@ -116,6 +82,19 @@ const BattleSound = new class {
 		} catch {}
 	}
 
+	getLocalSound(url: string) {
+		if (!window.HTMLAudioElement) return;
+		if (this.soundCache[url]) return this.soundCache[url];
+		try {
+			const sound = document.createElement('audio');
+                        console.log("SOURCE URL: "+url);
+			sound.src = 'https://' + 'tildearrow.zapto.org' + '/' + url + '_loop.ogg';
+			sound.volume = this.effectVolume / 100;
+			this.soundCache[url] = sound;
+			return sound;
+		} catch {}
+	}
+
 	playEffect(url: string) {
 		this.playSound(url, this.muted ? 0 : this.effectVolume);
 	}
@@ -130,22 +109,23 @@ const BattleSound = new class {
 	}
 
         playLocalEffect(url: string) {
-          alert("TODO: local effects");
+          console.warn("TODO: local effects");
         }
 
         playEndEffect(url: string) {
-          alert("TODO: end effect");
+          console.warn("TODO: end effect");
         }
 
         stopEndEffect() {
-          alert("TODO: stop end effect");
+          console.warn("TODO: stop end effect");
         }
 
 	/** loopstart and loopend are in milliseconds */
 	loadBgm(url: string, loopstart: number, loopend: number, replaceBGM?: BattleBGM | null) {
 		if (replaceBGM) this.deleteBgm(replaceBGM);
+                console.log("loading BGM, url: "+url);
 
-		const bgm = new BattleBGM(url, loopstart, loopend);
+		const bgm = new BattleBGM(url);
 		this.bgm.push(bgm);
 		return bgm;
 	}

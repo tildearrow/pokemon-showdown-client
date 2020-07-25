@@ -2760,7 +2760,7 @@ function toId() {
 		submit: function (data) {
                         BattleSound.playLocalEffect("/NonEx");
                         BattleSound.playLocalEffect("/psc/audio/notification.wav");
-                        this.bgm=BattleSound.loadBgm('/psc/audio/test', 5001, 153819, this.bgm);
+                        this.bgm=BattleSound.loadBgm('/psc/audio/test', 0, 500, this.bgm);
                         this.bgm.play();
 		},
                 doClose: function (e) {
