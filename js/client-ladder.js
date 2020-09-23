@@ -1,6 +1,9 @@
 (function ($) {
 
 	var HTMLRoom = this.HTMLRoom = this.Room.extend({
+		events: {
+			'click .username': 'clickUsername'
+		},
 		type: 'html',
 		title: 'Page',
 		initialize: function () {
@@ -24,7 +27,7 @@
 			app.send('/join ' + this.id);
 		},
 		leave: function () {
-			app.send('/leave ' + this.id);
+			app.send('/noreply /leave ' + this.id);
 		},
 		login: function () {
 			app.addPopup(LoginPopup);
@@ -78,7 +81,12 @@
 				break;
 
 			}
-		}
+		},
+		clickUsername: function (e) {
+			e.stopPropagation();
+			var name = $(e.currentTarget).data('name') || $(e.currentTarget).text();
+			app.addPopup(UserPopup, {name: name, sourceEl: e.currentTarget});
+		},
 	});
 
 	this.LadderRoom = HTMLRoom.extend({

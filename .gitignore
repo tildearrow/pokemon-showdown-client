@@ -12,6 +12,7 @@ Thumbs.db
 npm-debug.log
 package-lock.json
 /vendor/
+.vscode
 
 /js/battle.js
 /js/battledata.js
@@ -46,4 +47,7 @@ package-lock.json
 /replays/replay-config.inc.php
 /replays/theme/wrapper.inc.php
 
-.vscode
+/website/.well-known/
+/website/.pages-cached/
+/website/files/
+/website/images/

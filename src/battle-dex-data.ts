@@ -504,6 +504,7 @@ const BattlePokemonIconIndexes: {[id: string]: number} = {
 	swirlpool: 1332 + 28,
 	coribalis: 1332 + 29,
 	justyke: 1332 + 30,
+	solotl: 1332 + 31,
 };
 
 const BattlePokemonIconIndexesLeft: {[id: string]: number} = {
@@ -1192,7 +1193,8 @@ class Move implements Effect {
 				}
 			}
 		}
-		if (this.category !== 'Status' && !this.zMove && !this.isZ && !this.isMax) {
+
+		if (this.category !== 'Status' && !this.isZ && !this.isMax) {
 			let basePower = this.basePower;
 			this.zMove = {};
 			if (Array.isArray(this.multihit)) basePower *= 3;
@@ -1327,7 +1329,7 @@ class Species implements Effect {
 	readonly tier: string;
 	readonly isTotem: boolean;
 	readonly isMega: boolean;
-	readonly isGigantamax: boolean;
+	readonly canGigantamax: boolean;
 	readonly isPrimal: boolean;
 	readonly battleOnly: string | string[] | undefined;
 	readonly isNonstandard: string | null;
@@ -1376,14 +1378,14 @@ class Species implements Effect {
 
 		this.isTotem = false;
 		this.isMega = false;
-		this.isGigantamax = !!(this.forme?.endsWith('Gmax'));
+		this.canGigantamax = !!data.canGigantamax;
 		this.isPrimal = false;
-		this.battleOnly = data.battleOnly || (this.isGigantamax ? this.baseSpecies : undefined);
+		this.battleOnly = data.battleOnly || undefined;
 		this.isNonstandard = data.isNonstandard || null;
 		this.unreleasedHidden = data.unreleasedHidden || false;
 		this.changesFrom = data.changesFrom || undefined;
 		if (!this.gen) {
-			if (this.num >= 810 || this.forme === 'Galar' || this.isGigantamax) {
+			if (this.num >= 810 || this.formeid.startsWith('-galar')) {
 				this.gen = 8;
 			} else if (this.num >= 722 || this.formeid === '-alola' || this.formeid === '-starter') {
 				this.gen = 7;

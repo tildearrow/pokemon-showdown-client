@@ -1234,7 +1234,7 @@
 			app.send('/join ' + this.id);
 		},
 		leave: function () {
-			app.send('/leave ' + this.id);
+			app.send('/noreply /leave ' + this.id);
 			app.updateAutojoin();
 		},
 		requestLeave: function (e) {
@@ -1246,6 +1246,9 @@
 		},
 		receive: function (data) {
 			this.add(data);
+		},
+		getUserGroup: function (userid) {
+			return (app.rooms[this.id].users[userid] || {group: ' '}).group;
 		},
 		add: function (log) {
 			if (typeof log === 'string') log = log.split('\n');
@@ -1425,6 +1428,7 @@
 					break;
 
 				case 'unlink':
+					// |unlink| is deprecated in favor of |hidelines|
 					// note: this message has global effects, but it's handled here
 					// so that it can be included in the scrollback buffer.
 					if (Dex.prefs('nounlink')) return;
@@ -1444,7 +1448,26 @@
 						this.$chat.children().last().append(' <button name="toggleMessages" value="' + user + '" class="subtle"><small>(' + $messages.length + ' line' + ($messages.length > 1 ? 's' : '') + ' from ' + user + ' hidden)</small></button>');
 					}
 					break;
-
+				case 'hidelines':
+					if (Dex.prefs('nounlink')) return;
+					var user = toID(row[2]);
+					var $messages = $('.chatmessage-' + user);
+					if (!$messages.length) break;
+					$messages.find('a').contents().unwrap();
+					if (row[1] !== 'unlink') {
+						$messages = this.$chat.find('.chatmessage-' + user);
+						if (!$messages.length) break;
+						var lineCount = parseInt(row[3], 10) || 0;
+						if (lineCount) $messages = $messages.slice(-lineCount);
+						$messages.hide().addClass('revealed').find('button').parent().remove();
+						var staffGroups = Object.keys(Config.groups).filter(function (group) {
+							return ['staff', 'leadership'].includes(Config.groups[group].type);
+						});
+						if (row[1] === 'hide' || staffGroups.includes(this.getUserGroup(app.user.get('userid')))) {
+							this.$chat.children().last().append(' <button name="toggleMessages" value="' + user + '" class="subtle"><small>(' + $messages.length + ' line' + ($messages.length > 1 ? 's' : '') + ' from ' + user + ' hidden)</small></button>');
+						}
+					}
+					break;
 				case 'tournament':
 				case 'tournaments':
 					if (Dex.prefs('tournaments') === 'hide') {
@@ -1828,8 +1851,6 @@
 				{order: (Config.defaultOrder || 10006.5)}
 			).order;
 
-			if (a === 'zarel' && aRank === 10003) aRank = 10000.5;
-			if (b === 'zarel' && bRank === 10003) bRank = 10000.5;
 			if (aRank !== bRank) return aRank - bRank;
 			if (aUser.away !== bUser.away) return aUser.away - bUser.away;
 			return (a > b ? 1 : -1);

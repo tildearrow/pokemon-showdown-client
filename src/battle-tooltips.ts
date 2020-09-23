@@ -339,11 +339,11 @@ class BattleTooltips {
 			buf = `<p class="message-error" style="white-space: pre-wrap">${new Error(`unrecognized type`).stack}</p>`;
 		}
 
-		this.placeTooltip(buf, elem, ownHeight);
+		this.placeTooltip(buf, elem, ownHeight, type);
 		return true;
 	}
 
-	placeTooltip(innerHTML: string, hoveredElem?: HTMLElement, notRelativeToParent?: boolean) {
+	placeTooltip(innerHTML: string, hoveredElem?: HTMLElement, notRelativeToParent?: boolean, type?: string) {
 		let $elem;
 		if (hoveredElem) {
 			$elem = $(hoveredElem);
@@ -385,7 +385,7 @@ class BattleTooltips {
 			left: x,
 			top: y,
 		});
-		innerHTML = `<div class="tooltipinner"><div class="tooltip">${innerHTML}</div></div>`;
+		innerHTML = `<div class="tooltipinner"><div class="tooltip tooltip-${type}">${innerHTML}</div></div>`;
 		$wrapper.html(innerHTML).appendTo(document.body);
 		BattleTooltips.elem = $wrapper.find('.tooltip')[0] as HTMLDivElement;
 		BattleTooltips.isLocked = false;
@@ -1344,7 +1344,7 @@ class BattleTooltips {
 		if (allowTypeOverride && move.flags['sound'] && value.abilityModify(0, 'Liquid Voice')) {
 			moveType = 'Water';
 		}
-		if (allowTypeOverride && category !== 'Status') {
+		if (allowTypeOverride && category !== 'Status' && !move.isZ) {
 			if (moveType === 'Normal') {
 				if (value.abilityModify(0, 'Aerilate')) moveType = 'Flying';
 				if (value.abilityModify(0, 'Galvanize')) moveType = 'Electric';
@@ -1519,7 +1519,9 @@ class BattleTooltips {
 			}
 		}
 		if (move.id === 'weatherball') {
-			value.weatherModify(2);
+			if (this.battle.weather !== 'deltastream') {
+				value.weatherModify(2);
+			}
 		}
 		if (move.id === 'terrainpulse') {
 			if (
@@ -1652,7 +1654,7 @@ class BattleTooltips {
 		const noTypeOverride = [
 			'judgment', 'multiattack', 'naturalgift', 'revelationdance', 'struggle', 'technoblast', 'terrainpulse', 'weatherball',
 		];
-		if (move.category !== 'Status' && !noTypeOverride.includes(move.id)) {
+		if (move.category !== 'Status' && !noTypeOverride.includes(move.id) && !move.isZ && !move.isMax) {
 			if (move.type === 'Normal') {
 				value.abilityModify(this.battle.gen > 6 ? 1.2 : 1.3, "Aerilate");
 				value.abilityModify(this.battle.gen > 6 ? 1.2 : 1.3, "Galvanize");
@@ -1951,6 +1953,8 @@ interface PokemonSet {
 	pokeball?: string;
 	/** Defaults to the type of your Hidden Power in Moves, otherwise Dark */
 	hpType?: string;
+	/** Defaults to no (can only be yes for certain Pokemon) */
+	gigantamax?: boolean;
 }
 
 class BattleStatGuesser {

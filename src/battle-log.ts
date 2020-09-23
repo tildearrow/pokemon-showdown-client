@@ -107,6 +107,7 @@ class BattleLog {
 
 		case 'join': case 'j': case 'leave': case 'l': {
 			const user = BattleTextParser.parseNameParts(args[1]);
+			if (battle?.ignoreSpects && ' +'.includes(user.group)) return;
 			const formattedUser = user.group + user.name;
 			const isJoin = (args[0].charAt(0) === 'j');
 			if (!this.joinLeave) {
@@ -184,6 +185,7 @@ class BattleLog {
 			return;
 
 		case 'unlink': {
+			// |unlink| is deprecated in favor of |hidelines|
 			const user = toID(args[2]) || toID(args[1]);
 			this.unlinkChatFrom(user);
 			if (args[2]) {
@@ -192,6 +194,17 @@ class BattleLog {
 			}
 			return;
 		}
+
+		case 'hidelines': {
+			const user = toID(args[2]);
+			this.unlinkChatFrom(user);
+			if (args[1] !== 'unlink') {
+				const lineCount = parseInt(args[3], 10);
+				this.hideChatFrom(user, args[1] === 'hide', lineCount);
+			}
+			return;
+		}
+
 		case 'debug':
 			divClass = 'debug';
 			divHTML = '<div class="chat"><small style="color:#999">[DEBUG] ' + BattleLog.escapeHTML(args[1]) + '.</small></div>';
@@ -657,7 +670,7 @@ class BattleLog {
 	static interstice = (() => {
 		const whitelist: string[] = Config.whitelist;
 		const patterns = whitelist.map(entry => new RegExp(
-			`^(https?:)?//([A-Za-z0-9-]*\\.)?${entry}(/.*)?`,
+			`^(https?:)?//([A-Za-z0-9-]*\\.)?${entry.replace(/\./g, '\\.')}(/.*)?`,
 		'i'));
 		return {
 			isWhitelisted(uri: string) {

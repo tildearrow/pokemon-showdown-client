@@ -4,8 +4,8 @@ error_reporting(E_ALL);
 ini_set('display_errors', TRUE);
 ini_set('display_startup_errors', TRUE);
 
-require_once __DIR__ . '/theme/panels.lib.php';
 require_once __DIR__ . '/../config/config.inc.php';
+require_once __DIR__ . '/theme/panels.lib.php';
 
 $id = $_REQUEST['name'] ?? '';
 $password = '';
@@ -53,11 +53,11 @@ if (file_exists('caches/' . $id . '.inc.php')) {
 	}
 	$replay = $Replays->get($id, $forcecache);
 }
-if (!$replay || ($replay['private'] === 3 && !$manage)) {
+if (!$replay || (@$replay['private'] === 3 && !$manage)) {
 	include '404.php';
 	die();
 }
-$fullid = $id . ($replay['password'] ? '-' . $replay['password'] . 'pw' : '');
+$fullid = $id . (@$replay['password'] ? '-' . $replay['password'] . 'pw' : '');
 
 if (@$replay['private']) {
 	header('X-Robots-Tag: noindex');
@@ -134,7 +134,7 @@ $panels->start();
 
 			<pre class="urlbox" style="word-wrap: break-word;"><?php echo htmlspecialchars('https://'.$psconfig['routes']['replays'].'/'.$fullid); ?></pre>
 
-			<h1 style="font-weight:normal;text-align:left"><strong><?= htmlspecialchars($format) ?></strong>: <a href="//<?= $psconfig['routes']['replays'] ?>/<?= userid($replay['p1']) ?>" class="subtle"><?= htmlspecialchars($replay['p1']) ?></a> vs. <a href="//<?= $psconfig['routes']['replays'] ?>/<?= userid($replay['p2']) ?>" class="subtle"><?= htmlspecialchars($replay['p2']) ?></a></h1>
+			<h1 style="font-weight:normal;text-align:left"><strong><?= htmlspecialchars($format) ?></strong>: <a href="//<?= $psconfig['routes']['users'] ?>/<?= userid($replay['p1']) ?>" class="subtle"><?= htmlspecialchars($replay['p1']) ?></a> vs. <a href="//<?= $psconfig['routes']['users'] ?>/<?= userid($replay['p2']) ?>" class="subtle"><?= htmlspecialchars($replay['p2']) ?></a></h1>
 			<p style="padding:0 1em;margin-top:0">
 				<small class="uploaddate" data-timestamp="<?= @$replay['uploadtime'] ?? @$replay['date'] ?>"><em>Uploaded:</em> <?php echo date("M j, Y", @$replay['uploadtime'] ?? @$replay['date']); ?><?= @$replay['rating'] ? ' | <em>Rating:</em> ' . $replay['rating'] : '' ?></small>
 			</p>

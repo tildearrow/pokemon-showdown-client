@@ -504,6 +504,8 @@ const Dex = new class implements ModdedDex {
 			pokemon = pokemon.getSpeciesForme();
 		}
 		const species = Dex.getSpecies(pokemon);
+		// Gmax sprites are already extremely large, so we don't need to double.
+		if (species.name.endsWith('-Gmax')) isDynamax = false;
 		let spriteData = {
 			gen: mechanicsGen,
 			w: 96,
@@ -559,7 +561,7 @@ const Dex = new class implements ModdedDex {
 		if (!animationData) animationData = {};
 		if (!miscData) miscData = {};
 
-		if (miscData.num > 0) {
+		if (miscData.num !== 0 && miscData.num > -5000) {
 			let baseSpeciesid = toID(species.baseSpecies);
 			spriteData.cryurl = 'audio/cries/' + baseSpeciesid;
 			let formeid = species.formeid;
@@ -579,7 +581,7 @@ const Dex = new class implements ModdedDex {
 			)) {
 				spriteData.cryurl += formeid;
 			}
-			spriteData.cryurl += (window.nodewebkit ? '.ogg' : '.mp3');
+			spriteData.cryurl += '.mp3';
 		}
 
 		if (options.shiny && mechanicsGen > 1) dir += '-shiny';
@@ -605,7 +607,7 @@ const Dex = new class implements ModdedDex {
 		// Mod Cries
 		if (options.mod) {
 			spriteData.cryurl = `sprites/${options.mod}/audio/${toID(species.baseSpecies)}`;
-			spriteData.cryurl += (window.nodewebkit ? '.ogg' : '.mp3');
+			spriteData.cryurl += '.mp3';
 		}
 
 		if (animationData[facing + 'f'] && options.gender === 'F') facing += 'f';
@@ -716,7 +718,7 @@ const Dex = new class implements ModdedDex {
 		let top = Math.floor(num / 12) * 30;
 		let left = (num % 12) * 40;
 		let fainted = ((pokemon as Pokemon | ServerPokemon)?.fainted ? `;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
-		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?d1) no-repeat scroll -${left}px -${top}px${fainted}`;
+		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v2) no-repeat scroll -${left}px -${top}px${fainted}`;
 	}
 
 	getTeambuilderSpriteData(pokemon: any, gen: number = 0): TeambuilderSpriteData {

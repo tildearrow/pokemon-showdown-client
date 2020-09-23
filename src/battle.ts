@@ -475,7 +475,7 @@ class Pokemon implements PokemonDetails, PokemonHealth {
 		} else {
 			types = this.getSpecies(serverPokemon).types;
 		}
-		if (this.volatiles.roost && types.includes('Flying')) {
+		if (this.hasTurnstatus('roost' as ID) && types.includes('Flying')) {
 			types = types.filter(typeName => typeName !== 'Flying');
 			if (!types.length) types = ['Normal'];
 		}
@@ -2563,11 +2563,10 @@ class Battle {
 		case '-singleturn': {
 			let poke = this.getPokemon(args[1])!;
 			let effect = Dex.getEffect(args[2]);
-			poke.addTurnstatus(effect.id);
-
 			if (effect.id === 'roost' && !poke.getTypeList().includes('Flying')) {
 				break;
 			}
+			poke.addTurnstatus(effect.id);
 			switch (effect.id) {
 			case 'roost':
 				this.scene.resultAnim(poke, 'Landed', 'neutral');
@@ -2632,6 +2631,10 @@ class Battle {
 			let target = this.getPokemon(args[3]);
 			this.activateAbility(poke, effect);
 			switch (effect.id) {
+			case 'poltergeist':
+				poke.item = kwArgs.item;
+				poke.itemEffect = 'disturbed';
+				break;
 			case 'grudge':
 				poke.rememberMove(kwArgs.move, Infinity);
 				break;
@@ -3251,9 +3254,7 @@ class Battle {
 				room.userList.updateUserCount();
 				room.userList.updateNoUsersOnline();
 			}
-			if (!this.ignoreSpects) {
-				this.log(args, undefined, preempt);
-			}
+			this.log(args, undefined, preempt);
 			break;
 		}
 		case 'leave': case 'l': case 'L': {
@@ -3267,9 +3268,7 @@ class Battle {
 				room.userList.updateUserCount();
 				room.userList.updateNoUsersOnline();
 			}
-			if (!this.ignoreSpects) {
-				this.log(args, undefined, preempt);
-			}
+			this.log(args, undefined, preempt);
 			break;
 		}
 		case 'name': case 'n': case 'N': {

@@ -311,13 +311,13 @@ class PSServer {
 			type: 'leadership',
 			order: 101,
 		},
-		'&': {
-			name: "Administrator (&)",
+		'#': {
+			name: "Room Owner (#)",
 			type: 'leadership',
 			order: 102,
 		},
-		'#': {
-			name: "Room Owner (#)",
+		'&': {
+			name: "Administrator (&)",
 			type: 'leadership',
 			order: 103,
 		},
@@ -519,7 +519,7 @@ class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 	}
 	destroy() {
 		if (this.connected) {
-			this.send('/leave', true);
+			this.send('/noreply /leave', true);
 			this.connected = false;
 		}
 	}

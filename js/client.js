@@ -199,6 +199,9 @@ function toId() {
 				case 'blockChallenges':
 					app.send(value ? '/blockchallenges' : '/unblockchallenges');
 					break;
+				case 'language':
+					app.send('/language ' + value);
+					break;
 				default:
 					throw new TypeError('Unknown setting:' + setting);
 				}
@@ -2393,7 +2396,17 @@ function toId() {
 
 		close: function () {
 			app.closePopup();
-		}
+		},
+
+		register: function () {
+			var registered = app.user.get('registered');
+			app.closePopup();
+			if (!registered || registered.userid !== app.user.get('userid')) {
+				app.addPopup(RegisterPopup);
+			} else {
+				app.addPopupMessage("You are already registered!");
+			}
+		},
 	});
 
 	var PromptPopup = this.PromptPopup = Popup.extend({
@@ -2421,13 +2434,13 @@ function toId() {
 			type: 'leadership',
 			order: 10001
 		},
-		'&': {
-			name: "Administrator (&amp;)",
+		'#': {
+			name: "Room Owner (#)",
 			type: 'leadership',
 			order: 10002
 		},
-		'#': {
-			name: "Room Owner (#)",
+		'&': {
+			name: "Administrator (&amp;)",
 			type: 'leadership',
 			order: 10003
 		},
@@ -2513,7 +2526,7 @@ function toId() {
 			var globalGroupName = '';
 			if (globalGroup && globalGroup.name) {
 				if (globalGroup.type === 'punishment') {
-					globalGroupName = globalGroup.name;
+					groupName = globalGroup.name;
 				} else if (!groupName || groupName === globalGroup.name) {
 					groupName = "Global " + globalGroup.name;
 				} else {
@@ -2778,8 +2791,8 @@ function toId() {
 		initialize: function (data) {
 			var buf = '';
 			buf = '<p>Your replay has been uploaded! It\'s available at:</p>';
-			buf += '<p><a href="https://' + Config.routes.replays + '/' + data.id + '" target="_blank" class="no-panel-intercept">https://' + Config.routes.replays + '/' + data.id + '</a></p>';
-			buf += '<p><button class="autofocus" name="close">Close</button></p>';
+			buf += '<p> <a class="replay-link" href="https://' + Config.routes.replays + '/' + data.id + '" target="_blank" class="no-panel-intercept">https://' + Config.routes.replays + '/' + data.id + '</a> <button name="copyReplayLink">Copy</button></p>';
+			buf += '<p><button class="autofocus" name="close">Close</button><p>';
 			this.$el.html(buf).css('max-width', 620);
 		},
 		clickClose: function () {
@@ -2787,6 +2800,18 @@ function toId() {
 		},
 		submit: function (i) {
 			this.close();
+		},
+		copyReplayLink: function () {
+			var copyText = this.$(".replay-link")[0];
+			var dummyReplayLink = document.createElement("input");
+			// This is a hack. You can only "select" an input field. The trick is to create a short lived input element and destroy it after a copy.
+			dummyReplayLink.id = "dummyReplayLink";
+			dummyReplayLink.value = copyText.href;
+			dummyReplayLink.style.position = 'absolute';
+			copyText.appendChild(dummyReplayLink);
+			dummyReplayLink.select();
+			document.execCommand("copy");
+			copyText.removeChild(dummyReplayLink);
 		}
 	});
 
@@ -2816,7 +2841,7 @@ function toId() {
 			if (!warning) {
 				buf += '<p><b>Usernames</b></p>' +
 					'<p>Your username can be chosen and changed at any time. Keep in mind:</p>' +
-					'<p><b>1.</b> Usernames may not impersonate a recognized user (a user with %, @, or &amp; next to their name) or a famous person/organization that uses PS or is associated with Pokémon.</p>' +
+					'<p><b>1.</b> Usernames may not impersonate a recognized user (a user with %, @, #, or &amp; next to their name) or a famous person/organization that uses PS or is associated with Pokémon.</p>' +
 					'<p><b>2.</b> Usernames may not be derogatory or insulting in nature, to an individual or group (insulting yourself is okay as long as it\'s not too serious).</p>' +
 					'<p><b>3.</b> Usernames may not directly reference sexual activity, or be excessively disgusting.</p>' +
 					'<p>This policy is less restrictive than that of many places, so you might see some "borderline" nicknames that might not be accepted elsewhere. You might consider it unfair that they are allowed to keep their nickname. The fact remains that their nickname follows the above rules, and if you were asked to choose a new name, yours does not.</p>';

@@ -1,7 +1,7 @@
 <?php
 
-require_once __DIR__ . '/ntbb-database.lib.php';
 require_once __DIR__ . '/../config/config.inc.php';
+require_once __DIR__ . '/ntbb-database.lib.php';
 // require_once dirname(__FILE__) . '/password_compat/lib/password.php';
 
 $curuser = false;
@@ -496,7 +496,7 @@ class NTBBSession {
 					$usertype = '5';
 				} else if (@$user['banstate'] == 0) {
 					if (@$user['registertime'] && time() - $user['registertime'] > 7*24*60*60) {
-						$res = $psdb->query("SELECT formatid FROM ntbb_ladder WHERE userid = ? LIMIT 1", [$userid]);
+						$res = $psdb->query("SELECT formatid FROM ntbb_ladder WHERE userid = ? AND w != 0 LIMIT 1", [$userid]);
 						if ($psdb->fetch_assoc($res)) {
 							$usertype = '4';
 							$psdb->query("UPDATE ntbb_users SET banstate = -10 WHERE userid = ? LIMIT 1", [$userid]);
