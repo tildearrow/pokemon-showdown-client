@@ -581,7 +581,7 @@ const Dex = new class implements ModdedDex {
 			)) {
 				spriteData.cryurl += formeid;
 			}
-			spriteData.cryurl += '.mp3';
+			spriteData.cryurl += (window.nodewebkit ? '.ogg' : '.mp3');
 		}
 
 		if (options.shiny && mechanicsGen > 1) dir += '-shiny';
@@ -607,7 +607,7 @@ const Dex = new class implements ModdedDex {
 		// Mod Cries
 		if (options.mod) {
 			spriteData.cryurl = `sprites/${options.mod}/audio/${toID(species.baseSpecies)}`;
-			spriteData.cryurl += '.mp3';
+			spriteData.cryurl += (window.nodewebkit ? '.ogg' : '.mp3');
 		}
 
 		if (animationData[facing + 'f'] && options.gender === 'F') facing += 'f';
