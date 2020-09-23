@@ -1,3 +1,7 @@
+g5inst=new Gapless5("gapless5-block", {
+                          loop: true,
+                          tracks: ["/psc/audio/bgm/silence_intro.mp3", "/psc/audio/bgm/silence_loop.mp3"],
+});
 
 // TODO: please fix looping. perhaps use howler.js.
 class BattleBGM {
@@ -12,10 +16,16 @@ class BattleBGM {
                this.url = url;
                let ext = ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) ? '.mp3' : '.ogg';
                //this.sound = sound;
-               this.sound = new Gapless5("gapless5-block", {
-                          loop: true,
-                          tracks: [url+"_intro"+ext, url+"_loop"+ext],
-                        });
+               this.sound = g5inst;
+               this.sound.stop();
+               console.log("loading thingy");
+               this.sound.insertTrack(0,url+"_intro"+ext);
+               this.sound.insertTrack(1,url+"_loop"+ext);
+               this.sound.gotoTrack(0,false);
+               while (this.sound.totalTracks()>2) {
+                 this.sound.removeTrack(2);
+               }
+               this.sound.setGain(BattleSound.bgmVolume*655.35);
        }
        play() {
                if (this.isPlaying) return;
@@ -71,26 +81,42 @@ const BattleSound = new class {
 	muted = false;
 
 	getSound(url: string) {
-		if (!window.HTMLAudioElement) return;
-		if (this.soundCache[url]) return this.soundCache[url];
+                if ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) {
+                  sCN='mono';
+		  if (this.soundCache[sCN]) {
+                    this.soundCache[sCN].src = 'https://' + Config.routes.client + '/' + url;
+                    this.soundCache[sCN].load();
+                    this.soundCache[sCN].volume=this.effectVolume/100;
+                    return this.soundCache[sCN];
+                  }
+                } else {
+                  sCN=url;
+		  if (this.soundCache[sCN]) return this.soundCache[sCN];
+                }
 		try {
-			const sound = document.createElement('audio');
-			sound.src = 'https://' + Config.routes.client + '/' + url;
-			sound.volume = this.effectVolume / 100;
-			this.soundCache[url] = sound;
-			return sound;
+			this.soundCache[sCN] = new Audio('https://' + Config.routes.client + '/' + url);
+			this.soundCache[sCN].volume = this.effectVolume / 100;
+			return this.soundCache[sCN];
 		} catch {}
 	}
 
 	getLocalSound(url: string) {
-		if (!window.HTMLAudioElement) return;
-		if (this.soundCache[url]) return this.soundCache[url];
+                if ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) {
+                  sCN='mono';
+		  if (this.soundCache[sCN]) {
+                    this.soundCache[sCN].src = url;
+                    this.soundCache[sCN].load();
+                    this.soundCache[sCN].volume=this.effectVolume/100;
+                    return this.soundCache[sCN];
+                  }
+                } else {
+                  sCN=url;
+		  if (this.soundCache[sCN]) return this.soundCache[sCN];
+                }
 		try {
-			const sound = document.createElement('audio');
-			sound.src = '//' + location.host + url;
-			sound.volume = this.effectVolume / 100;
-			this.soundCache[url] = sound;
-			return sound;
+			this.soundCache[sCN] = new Audio(url);
+			this.soundCache[sCN].volume = this.effectVolume / 100;
+			return this.soundCache[sCN];
 		} catch {}
 	}
 
@@ -120,12 +146,34 @@ const BattleSound = new class {
 		}
 	}
 
-        playEndEffect(url: string) {
-          console.warn("TODO: end effect");
+        loadEndEffect(url: string) {
+                if (this.soundCache['endbgm']) {
+                    this.soundCache['endbgm'].src = url;
+                    this.soundCache['endbgm'].load();
+                    this.soundCache['endbgm'].volume=this.effectVolume/100;
+                } else {
+                 try {
+                    this.soundCache['endbgm'] = new Audio(url);
+                    this.soundCache['endbgm'].volume=this.effectVolume/100;
+                 } catch {}
+                 if (!this.soundCache['endbgm']) {
+                   this.soundCache['endbgm'] = this.soundPlaceholder;
+                 }
+                }
+               return this.soundCache['endbgm'];
         }
-
+        playEndEffect(url: string) {
+               if (!this.muted) {
+                  var s=this.loadEndEffect(url);
+                  s.volume=this.effectVolume/100;
+                  if (s.paused) s.play();
+                }
+        }
         stopEndEffect() {
-          console.warn("TODO: stop end effect");
+          if (this.soundCache['endbgm']) {
+            this.soundCache['endbgm'].pause();
+            this.soundCache['endbgm'].currentTime=0;
+          }
         }
 
 	/** loopstart and loopend are in milliseconds */

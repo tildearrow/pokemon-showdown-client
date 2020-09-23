@@ -2913,6 +2913,53 @@ class Battle {
 		}
 		return output;
 	}
+        checkHurry() {
+                var doHurry=false;
+
+                if (this.mySide.active[0]!=null) {
+                  console.log("maxhealth of 0: "+this.mySide.active[0].maxhp);
+                  console.log("health of 0: "+this.mySide.active[0].hp);
+                  console.log("THE DIVISION: "+(this.mySide.active[0].hp/this.mySide.active[0].maxhp));
+                  if (this.mySide.active[0].name==='Shedinja') {
+                    doHurry=true;
+                  }
+                  if ((this.mySide.active[0].hp/this.mySide.active[0].maxhp)<=0.05 && this.mySide.active[0].hp>0) {
+                    doHurry=true;
+                  }
+                }
+                if (this.mySide.active[1]!=null) {
+                  console.log("maxhealth of 1: "+this.mySide.active[1].maxhp);
+                  console.log("health of 1: "+this.mySide.active[1].hp);
+                  if (this.mySide.active[1].name==='Shedinja') {
+                    doHurry=true;
+                  }
+                  if ((this.mySide.active[1].hp/this.mySide.active[1].maxhp)<=0.05 && this.mySide.active[1].hp>0) {
+                    doHurry=true;
+                  }
+                }
+                if (this.mySide.active[2]!=null) {
+                  console.log("maxhealth of 2: "+this.mySide.active[2].maxhp);
+                  console.log("health of 2: "+this.mySide.active[2].hp);
+                  if (this.mySide.active[2].name==='Shedinja') {
+                    doHurry=true;
+                  }
+                  if ((this.mySide.active[2].hp/this.mySide.active[2].maxhp)<=0.05 && this.mySide.active[2].hp>0) {
+                    doHurry=true;
+                  }
+                }
+                if (this.scene.bgm != null) {
+                  if (doHurry) {
+                    console.log("hurrying");
+		    this.scene.setBgm(-4);
+                  } else {
+                    console.log("not hurrying");
+		    this.scene.setBgm(-3);
+                  }
+                  this.scene.bgm.play();
+                } else {
+                  console.log("bgm is null. skipping.");
+                }
+        }
 	parseHealth(hpstring: string, output: PokemonHealth = {} as any) {
 		let [hp, status] = hpstring.split(' ');
 
@@ -2950,39 +2997,7 @@ class Battle {
 			output.fainted = true;
 		}
 
-                console.log("parsing... health!");
-                var doHurry=false;
-
-                if (this.mySide.active[0]!=null) {
-                  console.log("side 0: "+this.mySide.active[0].hp);
-                  if (this.mySide.active[0].hp<5 && this.mySide.active[0].hp>0) {
-                    doHurry=true;
-                  }
-                }
-                if (this.mySide.active[1]!=null) {
-                  console.log("side 1: "+this.mySide.active[1].hp);
-                  if (this.mySide.active[1].hp<5 && this.mySide.active[1].hp>0) {
-                    doHurry=true;
-                  }
-                }
-                if (this.mySide.active[2]!=null) {
-                  console.log("side 2: "+this.mySide.active[2].hp);
-                  if (this.mySide.active[2].hp<5 && this.mySide.active[2].hp>0) {
-                    doHurry=true;
-                  }
-                }
-                if (this.scene.bgm != null) {
-                  if (doHurry) {
-                    console.log("hurrying");
-		    this.scene.setBgm(-4);
-                  } else {
-                    console.log("not hurrying");
-		    this.scene.setBgm(-3);
-                  }
-                  this.scene.bgm.play();
-                } else {
-                  console.log("bgm is null. skipping.");
-                }
+                this.checkHurry();
 		return output;
 	}
 	parsePokemonId(pokemonid: string) {
@@ -3336,6 +3351,7 @@ class Battle {
 				poke.side.dragIn(poke);
 			}
 			this.log(args, kwArgs);
+                        this.checkHurry();
 			break;
 		}
 		case 'faint': {
