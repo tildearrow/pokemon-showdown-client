@@ -679,7 +679,9 @@ abstract class BattleTypedSearch<T extends SearchType> {
 	protected firstLearnsetid(speciesid: ID) {
 		if (speciesid in BattleTeambuilderTable.learnsets) return speciesid;
 		const species = this.dex.getSpecies(speciesid);
-		let baseLearnsetid = species.exists && toID(species.baseSpecies);
+		if (!species.exists) return '' as ID;
+
+		let baseLearnsetid = toID(species.baseSpecies);
 		if (typeof species.battleOnly === 'string' && species.battleOnly !== species.baseSpecies) {
 			baseLearnsetid = toID(species.battleOnly);
 		}
@@ -867,8 +869,9 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		else if (format === 'cap') tierSet = tierSet.slice(0, slices.Uber).concat(tierSet.slice(slices.OU));
 		else if (format === 'caplc') tierSet = tierSet.slice(slices['CAP LC'], slices.Uber).concat(tierSet.slice(slices.LC));
 		else if (format.startsWith('lc') || format.endsWith('lc')) tierSet = tierSet.slice(slices["LC Uber"]);
-		else if (format === 'anythinggoes' || format === 'ag') tierSet = tierSet.slice(slices.AG || slices.Uber);
-		else if (format === 'balancedhackmons' || format === 'bh') tierSet = tierSet.slice(slices.AG || slices.Uber);
+		else if (format === 'anythinggoes' || format.endsWith('ag')) tierSet = tierSet.slice(slices.AG || slices.Uber);
+		else if (format === 'balancedhackmons' || format.endsWith('bh')) tierSet = tierSet.slice(slices.AG || slices.Uber);
+		else if (format === 'doublesubers') tierSet = tierSet.slice(slices.DUber);
 		else if (format === 'doublesou' && dex.gen > 4) tierSet = tierSet.slice(slices.DOU);
 		else if (format === 'doublesuu') tierSet = tierSet.slice(slices.DUU);
 		else if (format === 'doublesnu') tierSet = tierSet.slice(slices.DNU || slices.DUU);
@@ -971,7 +974,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 	getBaseResults() {
 		if (!this.species) return this.getDefaultResults();
 		const format = this.format;
-		const isBH = (format === 'balancedhackmons' || format === 'bh');
+		const isHackmons = (format.includes('hackmons') || format.endsWith('bh'));
 		const dex = this.dex;
 		let species = dex.getSpecies(this.species);
 		let abilitySet: SearchRow[] = [['header', "Abilities"]];
@@ -992,7 +995,7 @@ class BattleAbilitySearch extends BattleTypedSearch<'ability'> {
 			abilitySet.push(['header', "Special Event Ability"]);
 			abilitySet.push(['ability', toID(species.abilities['S'])]);
 		}
-		if (format === 'almostanyability' || format === 'metronomebattle' || isBH) {
+		if (format === 'almostanyability' || format === 'metronomebattle' || isHackmons) {
 			let abilities: ID[] = [];
 			for (let i in BattleAbilities) {
 				if (BattleAbilities[i].isNonstandard) continue;
@@ -1163,7 +1166,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		}
 
 		if (itemid === 'pidgeotite') abilityid = 'noguard' as ID;
-		if (itemid === 'blastoiseinite') abilityid = 'megalauncher' as ID;
+		if (itemid === 'blastoisinite') abilityid = 'megalauncher' as ID;
 		if (itemid === 'aerodactylite') abilityid = 'toughclaws' as ID;
 		if (itemid === 'glalitite') abilityid = 'refrigerate' as ID;
 
@@ -1177,7 +1180,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		case 'heatcrash': case 'heavyslam':
 			return species.weightkg >= (species.evos ? 75 : 130);
 
-		case 'aerialace': case 'dualwingbeat':
+		case 'aerialace':
 			return ['technician', 'toughclaws'].includes(abilityid) && !moves.includes('bravebird');
 		case 'ancientpower':
 			return ['serenegrace', 'technician'].includes(abilityid) || !moves.includes('powergem');
@@ -1192,6 +1195,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			return dex.gen < 7;
 		case 'drainingkiss':
 			return abilityid === 'triage';
+		case 'dualwingbeat':
+			return abilityid === 'technician' || !moves.includes('drillpeck');
 		case 'feint':
 			return abilityid === 'refrigerate';
 		case 'grassyglide':
@@ -1207,7 +1212,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		case 'hiddenpowerfire':
 			return (dex.gen < 4 && !moves.includes('firepunch')) && !moves.includes('flamethrower');
 		case 'hiddenpowergrass':
-			return !moves.includes('energyball') && !moves.includes('grassknot') || (dex.gen > 3 && !moves.includes('gigadrain'));
+			return !moves.includes('energyball') && !moves.includes('grassknot') && !moves.includes('gigadrain');
 		case 'hiddenpowerice':
 			return !moves.includes('icebeam') && (dex.gen < 4 && !moves.includes('icepunch')) || (dex.gen > 5 && !moves.includes('aurorabeam'));
 		case 'hiddenpowerflying':
@@ -1235,6 +1240,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			return dex.gen > 6 && !moves.includes('flamethrower');
 		case 'naturepower':
 			return dex.gen === 5;
+		case 'nightslash':
+			return !moves.includes('crunch') && !(moves.includes('knockoff') && dex.gen >= 6);
 		case 'petaldance':
 			return abilityid === 'owntempo';
 		case 'phantomforce':
@@ -1255,6 +1262,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			return species.types.includes('Ground');
 		case 'smartstrike':
 			return species.types.includes('Steel') && !moves.includes('ironhead');
+		case 'steelwing':
+			return !moves.includes('ironhead');
 		case 'stompingtantrum':
 			return (!moves.includes('earthquake') && !moves.includes('drillrun')) || this.formatType === 'doubles';
 		case 'stunspore':
@@ -1295,7 +1304,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		'agility', 'aromatherapy', 'auroraveil', 'autotomize', 'banefulbunker', 'batonpass', 'bellydrum', 'bulkup', 'calmmind', 'clangoroussoul', 'coil', 'cottonguard', 'courtchange', 'curse', 'defog', 'destinybond', 'detect', 'disable', 'dragondance', 'drainingkiss', 'encore', 'extremeevoboost', 'geomancy', 'glare', 'haze', 'healbell', 'healingwish', 'healorder', 'heartswap', 'honeclaws', 'kingsshield', 'irondefense', 'leechseed', 'lightscreen', 'lovelykiss', 'magiccoat', 'maxguard', 'memento', 'milkdrink', 'moonlight', 'morningsun', 'nastyplot', 'naturesmadness', 'noretreat', 'obstruct', 'painsplit', 'partingshot', 'perishsong', 'protect', 'quiverdance', 'recover', 'reflect', 'reflecttype', 'rest', 'roar', 'rockpolish', 'roost', 'shellsmash', 'shiftgear', 'slackoff', 'sleeppowder', 'sleeptalk', 'softboiled', 'spikes', 'spikyshield', 'spore', 'stealthrock', 'stickyweb', 'strengthsap', 'substitute', 'switcheroo', 'swordsdance', 'synthesis', 'tailglow', 'tailwind', 'taunt', 'thunderwave', 'toxic', 'toxicspikes', 'transform', 'trick', 'whirlwind', 'willowisp', 'wish', 'yawn',
 	] as ID[] as readonly ID[];
 	static readonly GOOD_WEAK_MOVES = [
-		'accelerock', 'acrobatics', 'aquajet', 'avalanche', 'bonemerang', 'bouncybubble', 'bulletpunch', 'bulletseed', 'buzzybuzz', 'circlethrow', 'clearsmog', 'doubleironbash', 'dragondarts', 'dragontail', 'endeavor', 'facade', 'firefang', 'flipturn', 'freezedry', 'frustration', 'geargrind', 'grassknot', 'gyroball', 'hex', 'icefang', 'iceshard', 'iciclespear', 'knockoff', 'lowkick', 'machpunch', 'nightshade', 'nightslash', 'nuzzle', 'pikapapow', 'psychocut', 'pursuit', 'quickattack', 'rapidspin', 'return', 'rockblast', 'scorchingsands', 'seismictoss', 'shadowclaw', 'shadowsneak', 'sizzlyslide', 'storedpower', 'stormthrow', 'suckerpunch', 'superfang', 'surgingstrikes', 'tailslap', 'tripleaxel', 'uturn', 'veeveevolley', 'voltswitch', 'watershuriken', 'weatherball',
+		'accelerock', 'acrobatics', 'aquajet', 'avalanche', 'bonemerang', 'bouncybubble', 'bulletpunch', 'bulletseed', 'buzzybuzz', 'circlethrow', 'clearsmog', 'doubleironbash', 'dragondarts', 'dragontail', 'endeavor', 'facade', 'firefang', 'flipturn', 'freezedry', 'frustration', 'geargrind', 'grassknot', 'gyroball', 'hex', 'icefang', 'iceshard', 'iciclespear', 'knockoff', 'lowkick', 'machpunch', 'nightshade', 'nuzzle', 'pikapapow', 'psychocut', 'pursuit', 'quickattack', 'rapidspin', 'return', 'rockblast', 'scorchingsands', 'seismictoss', 'shadowclaw', 'shadowsneak', 'sizzlyslide', 'storedpower', 'stormthrow', 'suckerpunch', 'superfang', 'surgingstrikes', 'tailslap', 'tripleaxel', 'uturn', 'veeveevolley', 'voltswitch', 'watershuriken', 'weatherball',
 	] as ID[] as readonly ID[];
 	static readonly BAD_STRONG_MOVES = [
 		'beakblast', 'belch', 'burnup', 'crushclaw', 'doomdesire', 'dragonrush', 'dreameater', 'eggbomb', 'firepledge', 'flyingpress', 'futuresight', 'grasspledge', 'hyperbeam', 'hyperfang', 'hyperspacehole', 'jawlock', 'landswrath', 'lastresort', 'megakick', 'megapunch', 'mistyexplosion', 'muddywater', 'nightdaze', 'pollenpuff', 'rockclimb', 'selfdestruct', 'shelltrap', 'skyuppercut', 'slam', 'strength', 'submission', 'synchronoise', 'takedown', 'thrash', 'uproar', 'waterpledge',
@@ -1308,8 +1317,8 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		const dex = this.dex;
 		let species = dex.getSpecies(this.species);
 		const format = this.format;
-		const isBH = (format === 'balancedhackmons' || format === 'bh');
-		const galarBornLegality = format.includes('battlestadium') || (format.startsWith('vgc') && this.dex.gen === 8);
+		const isHackmons = (format.includes('hackmons') || format.endsWith('bh'));
+		const galarBornLegality = (format.includes('battlestadium') || format.startsWith('vgc') && this.dex.gen === 8);
 
 		const abilityid = this.set ? toID(this.set.ability) : '' as ID;
 		const itemid = this.set ? toID(this.set.item) : '' as ID;
@@ -1346,11 +1355,9 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			}
 			learnsetid = this.nextLearnsetid(learnsetid, species.id);
 		}
-		if (sketch || isBH) {
-			if (isBH) moves = [];
+		if (sketch || isHackmons) {
+			if (isHackmons) moves = [];
 			for (let id in BattleMovedex) {
-				if (id === 'chatter' && !isBH) continue;
-				if (id === 'magikarpsrevenge') continue;
 				if (!format.startsWith('cap') && (id === 'paleowave' || id === 'shadowstrike')) continue;
 				if (!BattleMovedex[id].gen) {
 					if (BattleMovedex[id].num >= 743) {
@@ -1375,7 +1382,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				}
 				if (BattleMovedex[id].gen > dex.gen) continue;
 				if (BattleMovedex[id].isZ) continue;
-				if (isBH) {
+				if (isHackmons) {
 					moves.push(id);
 				} else {
 					sketchMoves.push(id);

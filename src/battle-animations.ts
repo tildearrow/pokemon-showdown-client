@@ -75,6 +75,7 @@ class BattleScene {
 	preloadCache: {[url: string]: HTMLImageElement} = {};
 
 	messagebarOpen = false;
+	customControls = false;
 	interruptionCount = 1;
 	curWeather = '';
 	curTerrain = '';
@@ -1444,6 +1445,7 @@ class BattleScene {
 		this.$frame.html(html);
 	}
 	setControlsHTML(html: any) {
+		this.customControls = true;
 		let $controls = this.$frame.parent().children('.battle-controls');
 		$controls.html(html);
 	}
