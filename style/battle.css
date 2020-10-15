@@ -51,7 +51,7 @@ License: GPLv2
 	left: 640px;
 	right: -1px;
 
-	font-family: Verdana, sans-serif;
+	font-family: 'IBM Plex Sans', sans-serif;
 	font-size: 10pt;
 }
 .battle-log {
@@ -65,7 +65,7 @@ License: GPLv2
 	right: -1px;
 	height: 360px;
 
-	font-family: Verdana, sans-serif;
+	font-family: 'IBM Plex Sans', sans-serif;
 	font-size: 10pt;
 
 	overflow: auto;

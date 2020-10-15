@@ -1476,7 +1476,10 @@ class BattleScene {
 		if (this.bgmNum === bgmNum) return;
 
                 if (bgmNum>110 || bgmNum<1) {
-                  if (bgmNum==-4) {
+                  if (bgmNum==-6) {
+		    this.bgmNum = bgmNum;
+		    this.bgm = BattleSound.loadBgm('/psc/audio/test', 5001, 153819, this.bgm);
+                  } else if (bgmNum==-4) {
 		    this.bgmNum = bgmNum;
 		    this.bgm = BattleSound.loadBgm('/psc/audio/hurry/hurry'+(1+Math.round(Math.random())), 5001, 153819, this.bgm);
                   } else if (bgmNum==-3) {

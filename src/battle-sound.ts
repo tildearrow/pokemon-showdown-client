@@ -82,19 +82,27 @@ const BattleSound = new class {
 
 	getSound(url: string) {
                 if ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) {
-                  sCN='mono';
+                  if (url.match("notification")) {
+                    sCN='duo';
+                    return null;
+                  } else {
+                    sCN='mono';
+                  }
 		  if (this.soundCache[sCN]) {
-                    this.soundCache[sCN].src = 'https://' + Config.routes.client + '/' + url;
+                    this.soundCache[sCN].src = url;
                     this.soundCache[sCN].load();
                     this.soundCache[sCN].volume=this.effectVolume/100;
                     return this.soundCache[sCN];
                   }
                 } else {
                   sCN=url;
-		  if (this.soundCache[sCN]) return this.soundCache[sCN];
+		  if (this.soundCache[sCN]) {
+                     this.soundCache[sCN].currentTime=0;
+                     return this.soundCache[sCN];
+                  }
                 }
 		try {
-			this.soundCache[sCN] = new Audio('https://' + Config.routes.client + '/' + url);
+			this.soundCache[sCN] = new Audio(url);
 			this.soundCache[sCN].volume = this.effectVolume / 100;
 			return this.soundCache[sCN];
 		} catch {}
@@ -111,7 +119,10 @@ const BattleSound = new class {
                   }
                 } else {
                   sCN=url;
-		  if (this.soundCache[sCN]) return this.soundCache[sCN];
+		  if (this.soundCache[sCN]) {
+                     this.soundCache[sCN].currentTime=0;
+                     return this.soundCache[sCN];
+                  }
                 }
 		try {
 			this.soundCache[sCN] = new Audio(url);

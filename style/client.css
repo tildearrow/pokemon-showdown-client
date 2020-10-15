@@ -2,6 +2,13 @@
  * Global
  *********************************************************/
 
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/s/plex.ttf') format('truetype');
+}
+
 html, body {
 	margin: 0;
 	padding: 0;
@@ -11,10 +18,10 @@ html, body {
 body {
 	color: white;
 	font-size: 11pt;
-	font-family: Verdana, Helvetica, Arial, sans-serif;
+	font-family: 'IBM Plex Sans', Helvetica, Arial, sans-serif;
 
 	/* see http://pokemonshowdown.com/credits */
-	background: #344b6c url(../fx/client-bg-charizards.jpg) no-repeat left center fixed;
+	background: #344b6c url(../fx/client-bg-peace.jpg) no-repeat left center fixed;
 	-webkit-background-size: cover;
 	-moz-background-size: cover;
 	-o-background-size: cover;
@@ -48,7 +55,7 @@ body {
 	border: 1px solid #AAAAAA;
 	border-radius: 3px;
 	padding: 2px 3px;
-	font-family: Verdana, Helvetica, Arial, sans-serif;
+	font-family: 'IBM Plex Sans', Helvetica, Arial, sans-serif;
 	font-size: 9pt;
 
 	box-shadow: inset 0px 1px 2px #CCCCCC, 1px 1px 0 rgba(255,255,255,.6);
@@ -364,7 +371,7 @@ select {
 	-moz-box-shadow: 0 1px 2px rgba(0,0,0,.2), inset 0 -1px 2px rgba(255,255,255,1);
 	box-shadow: 0 1px 2px rgba(0,0,0,.2), inset 0 -1px 2px rgba(255,255,255,1);
 	border-radius: 5px;
-	font-family: Verdana, Helvetica, Arial, sans-serif;
+	font-family: 'IBM Plex Sans', Helvetica, Arial, sans-serif;
 	display: inline-block;
 
 	/* default colors */
@@ -805,7 +812,7 @@ p.or:after {
 	padding: 0 5px;
 	font-size: 9pt;
 	text-align: left;
-	font-family: Verdana, Helvetica, Arial, sans-serif;
+	font-family: 'IBM Plex Sans', Helvetica, Arial, sans-serif;
 	cursor: pointer;
 
 	border-radius: 4px;
@@ -1101,9 +1108,6 @@ p.or:after {
 
 	width: 200px;
 
-	text-shadow: 0 -1px 0 hsl(210,40%,10%);
-	box-shadow: 0 1px 2px rgba(0,0,0,.2), inset 0 1px 1px rgba(255,255,255,.8);
-
 	/* default colors */
 	color: #FFFFFF;
 	border: solid 1px #AAAAAA;
@@ -1136,9 +1140,9 @@ p.or:after {
 	border-color: hsl(210,40%,21%);
 }
 
-.button.mainmenu1 { background: linear-gradient(to bottom,  hsl(5,40%,72%),  hsl(5,40%,52%)); border-color: hsl(5,40%,40%); }
-.button.mainmenu1:hover { background: linear-gradient(to bottom,  hsl(5,40%,62%),  hsl(5,40%,42%)); }
-.button.mainmenu1:active { background: linear-gradient(to bottom,  hsl(5,40%,42%),  hsl(5,40%,58%)); }
+.button.mainmenu1 { background: linear-gradient(to bottom,  hsl(205,10%,52%),  hsl(205,10%,42%)); border-color: hsl(205,10%,20%); }
+.button.mainmenu1:hover { background: linear-gradient(to bottom,  hsl(205,10%,42%),  hsl(205,10%,32%)); }
+.button.mainmenu1:active { background: linear-gradient(to bottom,  hsl(205,10%,32%),  hsl(205,10%,48%)); }
 
 .button.mainmenu2 { background: linear-gradient(to bottom,  hsl(30,40%,72%),  hsl(30,40%,52%)); border-color: hsl(30,40%,40%); }
 .button.mainmenu2:hover { background: linear-gradient(to bottom,  hsl(30,40%,62%),  hsl(30,40%,42%)); }

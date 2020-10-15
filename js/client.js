@@ -1998,6 +1998,7 @@ function toId() {
 		dispatchClickButton: function (e) {
 			var target = e.currentTarget;
 			if (target.name) {
+                                BattleSound.playEffect("/psc/audio/notification.wav");
 				app.dismissingSource = app.dismissPopups();
 				app.dispatchingButton = target;
 				e.preventDefault();
@@ -2542,6 +2543,12 @@ function toId() {
 			if (data.status || offline) {
 				var status = offline ? '(Offline)' : data.status.startsWith('!') ? data.status.slice(1) : data.status;
 				buf += '<span class="userstatus' + (offline ? ' offline' : '') + '">' + BattleLog.escapeHTML(status) + '<br /></span>';
+                                // offline sound
+                                if (status == "(Offline)") {
+                                        BattleSound.playLocalEffect("/psc/audio/pc/pc_logout.mp3");
+                                } else {
+                                        BattleSound.playLocalEffect("/psc/audio/pc/pc_connect.mp3");
+                                }
 			}
 			if (groupName) {
 				buf += '<small class="usergroup roomgroup">' + groupName + '</small>';
@@ -2760,25 +2767,37 @@ function toId() {
 	this.SoundTestPopup = Popup.extend({
 		type: 'modal',
                 events: {
+                  'click button[name=hearit]': 'doPlay',
+                  'click button[name=hearit2]': 'doPlay2',
+                  'click button[name=stopit]': 'doStop',
                   'click button[name=closeit]': 'doClose'
                 },
 		initialize: function (data) {
 			var buf = '<form>';
 			buf += '<p>Sound Test Form</p>';
-			buf += '<p class="buttonbar"><button type="submit"><strong>Hear something</strong></button><br/><button name="closeit">Done</button></p>';
+			buf += '<p class="buttonbar"><button name="hearit"><strong>Hear something</strong></button> <button name="hearit2"><strong>Hear something else</strong></button><button name="stopit">Stop</button> <button name="closeit">Close</button></p>';
 			buf += '</form>';
-			this.$el.html(buf).css('min-width', 500);
+			this.$el.html(buf).css('min-width', 200);
                         this.bgm=null;
 		},
-		submit: function (data) {
+		doPlay: function (data) {
                         BattleSound.playLocalEffect("/NonEx");
                         BattleSound.playLocalEffect("/psc/audio/notification.wav");
+                        //BattleBGM.setBgm(-6);
                         this.bgm=BattleSound.loadBgm('/psc/audio/test', 0, 500, this.bgm);
                         this.bgm.play();
 		},
+		doPlay2: function (data) {
+                        BattleSound.playLocalEffect("/NonEx");
+                        BattleSound.playLocalEffect("/psc/audio/notification.wav");
+                        //BattleBGM.setBgm(-6);
+                        this.bgm=BattleSound.loadBgm('/psc/audio/test2', 0, 500, this.bgm);
+                        this.bgm.play();
+		},
+                doStop: function (e) {
+                  this.bgm.stop();
+                },
                 doClose: function (e) {
-                  this.bgm=BattleSound.loadBgm('/NonEx', 5001, 153819, this.bgm);
-                  this.bgm.play();
                   this.close();
                 },
 	});
