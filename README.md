@@ -10,11 +10,26 @@ quoting Zarel:
 > This is unfortunately not supported by ANY sound library out there
 > (I had to manually add support for it myself to soundManager!)
 
-this fork uses Gapless-5 for music, which does exactly what is mentioned above (proper looping).
+this fork formerly used Gapless-5 for music, which does exactly what is mentioned above (proper looping)........ except that it doesn't.
+
+therefore, as of now I wrote a whole sound engine for the mere purpose of doing the aforementioned thing.
 
 it also adds more music (of which you have to provide yourself), and specific songs for winning/losing/tie conditions.
 
 oh and sound effects! (again, you have to provide the sound effects yourself).
+
+## Browser support
+
+this fork of Pokémon Showdown currently supports, in order of preference:
+
+ - Chrome 57+
+ - Firefox 53+
+ - Opera 44+
+ - Safari 11+
+
+support for WebAssembly is mandatory for the sound engine.
+
+we discourage using Safari. reasons to be written soon.
 
 ## Testing
 

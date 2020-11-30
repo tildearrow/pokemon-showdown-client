@@ -260,7 +260,7 @@ class Pokemon implements PokemonDetails, PokemonHealth {
 			if (this.checkDetails(details.replace(', shiny', ''))) return true;
 		}
 		// the actual forme was hidden on Team Preview
-		details = details.replace(/(-[A-Za-z0-9]+)?(, |$)/, '-*$2');
+		details = details.replace(/(-[A-Za-z0-9-]+)?(, |$)/, '-*$2');
 		return (details === this.details);
 	}
 	getIdent() {
@@ -590,6 +590,7 @@ class Side {
 	name = '';
 	id = '';
 	n: number;
+	isFar: boolean;
 	foe: Side = null!;
 	avatar: string = 'unknown';
 	rating: string = '';
@@ -608,9 +609,10 @@ class Side {
 	/** [effectName, levels, minDuration, maxDuration] */
 	sideConditions: {[id: string]: [string, number, number, number]} = {};
 
-	constructor(battle: Battle, n: number) {
+	constructor(battle: Battle, n: number, isOpp?: boolean) {
 		this.battle = battle;
 		this.n = n;
+		this.isFar = isOpp || !!n;
 		this.updateSprites();
 	}
 
@@ -620,16 +622,16 @@ class Side {
 	}
 
 	behindx(offset: number) {
-		return this.x + (!this.n ? -1 : 1) * offset;
+		return this.x + (!this.isFar ? -1 : 1) * offset;
 	}
 	behindy(offset: number) {
-		return this.y + (!this.n ? 1 : -1) * offset;
+		return this.y + (!this.isFar ? 1 : -1) * offset;
 	}
 	leftof(offset: number) {
-		return (!this.n ? -1 : 1) * offset;
+		return (!this.isFar ? -1 : 1) * offset;
 	}
 	behind(offset: number) {
-		return this.z + (!this.n ? -1 : 1) * offset;
+		return this.z + (!this.isFar ? -1 : 1) * offset;
 	}
 
 	clearPokemon() {
@@ -644,7 +646,7 @@ class Side {
 		this.sideConditions = {};
 	}
 	updateSprites() {
-		this.z = (this.n ? 200 : 0);
+		this.z = (this.isFar ? 200 : 0);
 		this.battle.scene.updateSpritesForSide(this);
 	}
 	setAvatar(avatar: string) {
@@ -694,16 +696,25 @@ class Side {
 			this.sideConditions[condition] = [effect.name, 1, 5, 0];
 			break;
 		case 'stealthrock':
-			this.sideConditions[condition] = [effect.name, 1, 0, 0];
-			break;
 		case 'spikes':
-			this.sideConditions[condition] = [effect.name, 1, 0, 0];
-			break;
 		case 'toxicspikes':
-			this.sideConditions[condition] = [effect.name, 1, 0, 0];
-			break;
 		case 'stickyweb':
 			this.sideConditions[condition] = [effect.name, 1, 0, 0];
+			break;
+		case 'gmaxwildfire':
+		case 'gmaxvolcalith':
+		case 'gmaxvinelash':
+		case 'gmaxcannonade':
+			this.sideConditions[condition] = [effect.name, 1, 4, 0];
+			break;
+		case 'grasspledge':
+			this.sideConditions[condition] = ['Swamp', 1, 4, 0];
+			break;
+		case 'waterpledge':
+			this.sideConditions[condition] = ['Rainbow', 1, 4, 0];
+			break;
+		case 'firepledge':
+			this.sideConditions[condition] = ['Sea of Fire', 1, 4, 0];
 			break;
 		default:
 			this.sideConditions[condition] = [effect.name, 1, 0, 0];
@@ -1062,7 +1073,8 @@ class Battle {
 	weatherTimeLeft = 0;
 	weatherMinTimeLeft = 0;
 	mySide: Side = null!;
-	yourSide: Side = null!;
+	nearSide: Side = null!;
+	farSide: Side = null!;
 	p1: Side = null!;
 	p2: Side = null!;
 	myPokemon: ServerPokemon[] | null = null;
@@ -1141,13 +1153,13 @@ class Battle {
 		return false;
 	}
 	init() {
-		this.mySide = new Side(this, 0);
-		this.yourSide = new Side(this, 1);
-		this.mySide.foe = this.yourSide;
-		this.yourSide.foe = this.mySide;
-		this.sides = [this.mySide, this.yourSide];
-		this.p1 = this.mySide;
-		this.p2 = this.yourSide;
+		this.p1 = new Side(this, 0);
+		this.p2 = new Side(this, 1);
+		this.sides = [this.p1, this.p2];
+		this.p2.foe = this.p1;
+		this.p1.foe = this.p2;
+		this.nearSide = this.mySide = this.p1;
+		this.farSide = this.p2;
 		this.gen = 7;
 		this.reset();
 	}
@@ -1199,7 +1211,8 @@ class Battle {
 			this.sides[i] = null!;
 		}
 		this.mySide = null!;
-		this.yourSide = null!;
+		this.nearSide = null!;
+		this.farSide = null!;
 		this.p1 = null!;
 		this.p2 = null!;
 
@@ -1234,16 +1247,14 @@ class Battle {
 	setSidesSwitched(sidesSwitched: boolean) {
 		this.sidesSwitched = sidesSwitched;
 		if (this.sidesSwitched) {
-			this.mySide = this.p2;
-			this.yourSide = this.p1;
+			this.nearSide = this.mySide = this.p2;
+			this.farSide = this.p1;
 		} else {
-			this.mySide = this.p1;
-			this.yourSide = this.p2;
+			this.nearSide = this.mySide = this.p1;
+			this.farSide = this.p2;
 		}
-		this.sides[0] = this.mySide;
-		this.sides[1] = this.yourSide;
-		this.sides[0].n = 0;
-		this.sides[1].n = 1;
+		this.nearSide.isFar = false;
+		this.farSide.isFar = true;
 
 		// nothing else should need updating - don't call this function after sending out pokemon
 	}
@@ -1544,6 +1555,7 @@ class Battle {
 		if (kwArgs.then) this.waitForAnimations = false;
 		if (kwArgs.simult) this.waitForAnimations = 'simult';
 
+		const CONSUMED = ['eaten', 'popped', 'consumed', 'held up'];
 		switch (args[0]) {
 		case '-damage': {
 			let poke = this.getPokemon(args[1])!;
@@ -1557,7 +1569,7 @@ class Battle {
 				this.activateAbility(ofpoke, effect);
 				if (effect.effectType === 'Item') {
 					const itemPoke = ofpoke || poke;
-					if (itemPoke.prevItem !== effect.name) {
+					if (itemPoke.prevItem !== effect.name && !CONSUMED.includes(itemPoke.prevItemEffect)) {
 						itemPoke.item = effect.name;
 					}
 				}
@@ -1611,8 +1623,10 @@ class Battle {
 			if (kwArgs.from) {
 				let effect = Dex.getEffect(kwArgs.from);
 				this.activateAbility(poke, effect);
-				if (effect.effectType === 'Item') {
-					poke.item = effect.name;
+				if (effect.effectType === 'Item' && !CONSUMED.includes(poke.prevItemEffect)) {
+					if (poke.prevItem !== effect.name) {
+						poke.item = effect.name;
+					}
 				}
 				switch (effect.id) {
 				case 'lunardance':
@@ -2703,6 +2717,8 @@ class Battle {
 					this.scene.updateStatbar(curTarget);
 				}
 				break;
+			case 'eeriespell':
+			case 'gmaxdepletion':
 			case 'spite':
 				let move = Dex.getMove(kwArgs.move).name;
 				let pp = Number(kwArgs.number);
@@ -2783,6 +2799,13 @@ class Battle {
 			case 'lightscreen':
 			case 'safeguard':
 			case 'mist':
+			case 'gmaxwildfire':
+			case 'gmaxvolcalith':
+			case 'gmaxvinelash':
+			case 'gmaxcannonade':
+			case 'grasspledge':
+			case 'firepledge':
+			case 'waterpledge':
 				this.scene.updateWeather();
 				break;
 			}
@@ -3121,10 +3144,10 @@ class Battle {
 	getSide(sidename: string): Side {
 		if (sidename === 'p1' || sidename.substr(0, 3) === 'p1:') return this.p1;
 		if (sidename === 'p2' || sidename.substr(0, 3) === 'p2:') return this.p2;
-		if (this.mySide.id === sidename) return this.mySide;
-		if (this.yourSide.id === sidename) return this.yourSide;
-		if (this.mySide.name === sidename) return this.mySide;
-		if (this.yourSide.name === sidename) return this.yourSide;
+		if (this.nearSide.id === sidename) return this.nearSide;
+		if (this.farSide.id === sidename) return this.farSide;
+		if (this.nearSide.name === sidename) return this.nearSide;
+		if (this.farSide.name === sidename) return this.farSide;
 		return {
 			name: sidename,
 			id: sidename.replace(/ /g, ''),
@@ -3164,8 +3187,8 @@ class Battle {
 		switch (args[0]) {
 		case 'start': {
 			this.scene.teamPreviewEnd();
-			this.mySide.active[0] = null;
-			this.yourSide.active[0] = null;
+			this.nearSide.active[0] = null;
+			this.farSide.active[0] = null;
 			this.start();
 			break;
 		}
@@ -3195,17 +3218,17 @@ class Battle {
 			this.gameType = args[1] as any;
 			switch (args[1]) {
 			default:
-				this.mySide.active = [null];
-				this.yourSide.active = [null];
+				this.nearSide.active = [null];
+				this.farSide.active = [null];
 				break;
 			case 'doubles':
-				this.mySide.active = [null, null];
-				this.yourSide.active = [null, null];
+				this.nearSide.active = [null, null];
+				this.farSide.active = [null, null];
 				break;
 			case 'triples':
 			case 'rotation':
-				this.mySide.active = [null, null, null];
-				this.yourSide.active = [null, null, null];
+				this.nearSide.active = [null, null, null];
+				this.farSide.active = [null, null, null];
 				break;
 			}
 			this.scene.updateGen();

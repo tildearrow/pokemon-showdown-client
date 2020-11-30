@@ -257,11 +257,11 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 	};
 	componentDidMount() {
 		const $elem = $(this.base!);
-		const battle = new Battle($elem.find<HTMLElement>('.battle'), $elem.find<HTMLElement>('.battle-log'));
+		const battle = new Battle($elem.find('.battle'), $elem.find('.battle-log'));
 		this.props.room.battle = battle;
 		battle.endCallback = () => this.forceUpdate();
 		battle.play();
-		(battle.scene as BattleScene).tooltips.listen($elem.find<HTMLElement>('.battle-controls'));
+		(battle.scene as BattleScene).tooltips.listen($elem.find('.battle-controls'));
 		super.componentDidMount();
 	}
 	receiveLine(args: Args) {
@@ -388,10 +388,10 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		const moveChoice = choices.stringChoice(choices.current);
 
 		const userSlot = choices.index();
-		const userSlotCross = battle.yourSide.active.length - 1 - userSlot;
+		const userSlotCross = battle.farSide.active.length - 1 - userSlot;
 
 		return [
-			battle.yourSide.active.map((pokemon, i) => {
+			battle.farSide.active.map((pokemon, i) => {
 				let disabled = false;
 				if (moveTarget === 'adjacentAlly' || moveTarget === 'adjacentAllyOrSelf') {
 					disabled = true;
@@ -406,7 +406,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 				/>;
 			}).reverse(),
 			<div style="clear: left"></div>,
-			battle.mySide.active.map((pokemon, i) => {
+			battle.nearSide.active.map((pokemon, i) => {
 				let disabled = false;
 				if (moveTarget === 'adjacentFoe') {
 					disabled = true;
@@ -491,14 +491,14 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 				if (choice.max && active?.canDynamax) buf.push(active?.canGigantamax ? `Gigantamax and ` : `Dynamax and `);
 				buf.push(`use `, <strong>{choices.getChosenMove(choice, i).name}</strong>);
 				if (choice.targetLoc > 0) {
-					const target = battle.yourSide.active[choice.targetLoc - 1];
+					const target = battle.farSide.active[choice.targetLoc - 1];
 					if (!target) {
 						buf.push(` at slot ${choice.targetLoc}`);
 					} else {
 						buf.push(` at ${target.name}`);
 					}
 				} else if (choice.targetLoc < 0) {
-					const target = battle.mySide.active[-choice.targetLoc - 1];
+					const target = battle.nearSide.active[-choice.targetLoc - 1];
 					if (!target) {
 						buf.push(` at ally slot ${choice.targetLoc}`);
 					} else {

@@ -127,7 +127,7 @@ class BattleTextParser {
 				return {args: ['-singlemove', pokemon, effect], kwArgs: {of: target}};
 			}
 			if ([
-				'bind', 'wrap', 'clamp', 'whirlpool', 'firespin', 'magmastorm', 'sandtomb', 'infestation', 'trapped',
+				'bind', 'wrap', 'clamp', 'whirlpool', 'firespin', 'magmastorm', 'sandtomb', 'infestation', 'snaptrap', 'thundercage', 'trapped',
 			].includes(id)) {
 				return {args: ['-start', pokemon, effect], kwArgs: {of: target}};
 			}
@@ -143,7 +143,9 @@ class BattleTextParser {
 			} else if (id === 'skillswap' || id === 'mummy' || id === 'wanderingspirit') {
 				kwArgs.ability = arg3;
 				kwArgs.ability2 = arg4;
-			} else if (['spite', 'grudge', 'forewarn', 'sketch', 'leppaberry', 'mysteryberry'].includes(id)) {
+			} else if ([
+				'eeriespell', 'gmaxdepletion', 'spite', 'grudge', 'forewarn', 'sketch', 'leppaberry', 'mysteryberry',
+			].includes(id)) {
 				kwArgs.move = arg3;
 				kwArgs.number = arg4;
 			}
@@ -258,9 +260,9 @@ class BattleTextParser {
 		return `???side:${side}???`;
 	}
 
-	team(side: string) {
+	team(side: string, isFar: 0 | 1 = 0) {
 		side = side.slice(0, 2);
-		if (side === (this.perspective === 0 ? 'p1' : 'p2')) {
+		if (side === (this.perspective === isFar ? 'p1' : 'p2')) {
 			return BattleText.default.team;
 		}
 		return BattleText.default.opposingTeam;
@@ -607,7 +609,7 @@ class BattleTextParser {
 			const id = BattleTextParser.effectId(ability);
 			if (id === 'unnerve') {
 				const template = this.template('start', ability);
-				return line1 + template.replace('[TEAM]', this.team(arg4));
+				return line1 + template.replace('[TEAM]', this.team(pokemon.slice(0, 2), 1));
 			}
 			let templateId = 'start';
 			if (id === 'anticipation' || id === 'sturdy') templateId = 'activate';
