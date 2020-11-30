@@ -461,7 +461,10 @@ function toId() {
 				Storage.prefs('bg', null);
 
 				var muted = Dex.prefs('mute');
+				var menusnd = Dex.prefs('menuSounds');
 				BattleSound.setMute(muted);
+				BattleSound.setMenuSounds(menusnd);
+
 
 				$('html').toggleClass('dark', !!Dex.prefs('dark'));
 
@@ -1998,7 +2001,9 @@ function toId() {
 		dispatchClickButton: function (e) {
 			var target = e.currentTarget;
 			if (target.name) {
-                                BattleSound.playEffect("/psc/audio/notification.wav");
+                                if (BattleSound.menuSounds) {
+                                  BattleSound.playEffect("/psc/audio/notification.wav");
+                                }
 				app.dismissingSource = app.dismissPopups();
 				app.dispatchingButton = target;
 				e.preventDefault();
@@ -2545,9 +2550,9 @@ function toId() {
 				buf += '<span class="userstatus' + (offline ? ' offline' : '') + '">' + BattleLog.escapeHTML(status) + '<br /></span>';
                                 // offline sound
                                 if (status == "(Offline)") {
-                                        BattleSound.playLocalEffect("/psc/audio/pc/pc_logout.mp3");
+                                        BattleSound.playLocalEffect("/psc/audio/pc/pc_logout.ogg");
                                 } else {
-                                        BattleSound.playLocalEffect("/psc/audio/pc/pc_connect.mp3");
+                                        BattleSound.playLocalEffect("/psc/audio/pc/pc_connect.ogg");
                                 }
 			}
 			if (groupName) {
@@ -2751,26 +2756,23 @@ function toId() {
 		type: 'modal',
 		initialize: function (data) {
 			var buf = '<form>';
-			buf += '<p>Because of <a href="https://webkit.org/blog/7734/auto-play-policy-changes-for-macos/" target="_blank">Safari\'s AutoPlay restrictions</a>, we need to do this manually:</p>';
-			buf += '<p class="buttonbar"><button type="submit"><strong>Allow sounds and music</strong></button> <button name="close">Cancel</button></p>';
+			buf += '<p>Warning</p><p><b>You are using Safari</b>, which is known for having issues regarding AudioBuffer playback and event timing.<br/>Therefore, unfocusing this tab <b>will cause major music playback stuttering</b>, of which no fix is known.<br/><br/>It also possesses major <a href="https://webkit.org/blog/7734/auto-play-policy-changes-for-macos/" target="_blank">AutoPlay hindrances</a>, which is the specific rationale for Asuka\'s existence (otherwise we would just be using Gapless-5 and the Web Audio API... you wouldn\'t want to click on a button every time a sound plays, right?).</p>';
+			buf += '<p class="buttonbar"><button type="submit"><strong>Agreed</strong></button></p>';
 			buf += '</form>';
 			this.$el.html(buf).css('min-width', 500);
 		},
 		submit: function (data) {
 			this.close();
-                        // TODO: play blank music
-                        BattleSound.playLocalEffect("/NonEx");
-                        BattleSound.playLocalEffect("/psc/audio/notification.wav");
-                        BattleSound.playEndEffect("/psc/audio/bgm/silence_intro.mp3");
-                        this.bgm=BattleSound.loadBgm('/psc/audio/bgm/silence', 5001, 153819, this.bgm);
-                        this.bgm.play();
-                        setTimeout(this.bgm.stop(),600);
+                        Asuka.initAudio();
 		}
 	});
 
 	this.SoundTestPopup = Popup.extend({
 		type: 'modal',
+                dint: null,
                 events: {
+                  'click button[name=startit]': 'doStart',
+                  'click button[name=prit]': 'doPr',
                   'click button[name=hearit]': 'doPlay',
                   'click button[name=hearit2]': 'doPlay2',
                   'click button[name=stopit]': 'doStop',
@@ -2778,30 +2780,43 @@ function toId() {
                 },
 		initialize: function (data) {
 			var buf = '<form>';
-			buf += '<p>Sound Test Form</p>';
+			buf += '<p style="text-align: center; font-size: 24px;">Troubleshoot</p>';
+			buf += '<p class="buttonbar"><button name="startit"><strong>Start sound engine</strong></button><button name="prit">Pause/resume sound engine</button></p>';
+                        buf += '<p>Sound Test:</p>';
 			buf += '<p class="buttonbar"><button name="hearit"><strong>Hear something</strong></button> <button name="hearit2"><strong>Hear something else</strong></button><button name="stopit">Stop</button> <button name="closeit">Close</button></p>';
 			buf += '</form>';
+                        buf += '<p>Debug Information:</p>';
+                        buf += '<p id="asukaDebug" style="font-size: 8px;">debugInfo</p>';
 			this.$el.html(buf).css('min-width', 200);
                         this.bgm=null;
+                        this.dint=setInterval(function() {
+                          document.getElementById("asukaDebug").innerHTML=Asuka.debugInfo();
+                        },250);
+		},
+		doStart: function (data) {
+                        Asuka.initAudio();
+		},
+		doPr: function (data) {
+                        alert("does nothing for now.");
 		},
 		doPlay: function (data) {
-                        BattleSound.playLocalEffect("/NonEx");
                         BattleSound.playLocalEffect("/psc/audio/notification.wav");
                         //BattleBGM.setBgm(-6);
-                        this.bgm=BattleSound.loadBgm('/psc/audio/test', 0, 500, this.bgm);
-                        this.bgm.play();
+                        Asuka.loadSong(0,0,'/psc/audio/test');
+                        Asuka.setMusicVolume(0,0,BattleSound.bgmVolume/100.00);
+                        Asuka.play(0,0);
 		},
 		doPlay2: function (data) {
-                        BattleSound.playLocalEffect("/NonEx");
                         BattleSound.playLocalEffect("/psc/audio/notification.wav");
-                        //BattleBGM.setBgm(-6);
-                        this.bgm=BattleSound.loadBgm('/psc/audio/test2', 0, 500, this.bgm);
-                        this.bgm.play();
+                        Asuka.loadSong(0,0,'/psc/audio/test2');
+                        Asuka.setMusicVolume(0,0,BattleSound.bgmVolume/100.00);
+                        Asuka.play(0,0);
 		},
                 doStop: function (e) {
-                  this.bgm.stop();
+                  Asuka.stop(0,0);
                 },
                 doClose: function (e) {
+                  clearInterval(this.dint);
                   this.close();
                 },
 	});

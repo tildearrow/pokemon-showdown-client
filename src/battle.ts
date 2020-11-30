@@ -271,11 +271,19 @@ class Pokemon implements PokemonDetails, PokemonHealth {
 		this.side.battle.scene.removeEffect(this, volatile);
 		if (!this.hasVolatile(volatile)) return;
 		delete this.volatiles[volatile];
+                console.log("removing volatile "+volatile);
+                if (volatile == "confusion") {
+                  if (this.side.battle.mySide == this.side) Asuka.setEffect(0,false);
+                }
 	}
 	addVolatile(volatile: ID, ...args: any[]) {
 		if (this.hasVolatile(volatile) && !args.length) return;
 		this.volatiles[volatile] = [volatile, ...args] as EffectState;
 		this.side.battle.scene.addEffect(this, volatile);
+                console.log("adding volatile "+volatile);
+                if (volatile == "confusion") {
+                  if (this.side.battle.mySide == this.side) Asuka.setEffect(0,true);
+                }
 	}
 	hasVolatile(volatile: ID) {
 		return !!this.volatiles[volatile];
@@ -283,6 +291,7 @@ class Pokemon implements PokemonDetails, PokemonHealth {
 	removeTurnstatus(volatile: ID) {
 		this.side.battle.scene.removeEffect(this, volatile);
 		if (!this.hasTurnstatus(volatile)) return;
+                console.log("removing turn status "+volatile);
 		delete this.turnstatuses[volatile];
 	}
 	addTurnstatus(volatile: ID) {
@@ -290,6 +299,7 @@ class Pokemon implements PokemonDetails, PokemonHealth {
 		this.side.battle.scene.addEffect(this, volatile);
 		if (this.hasTurnstatus(volatile)) return;
 		this.turnstatuses[volatile] = [volatile];
+                console.log("adding turn status "+volatile);
 	}
 	hasTurnstatus(volatile: ID) {
 		return !!this.turnstatuses[volatile];
@@ -304,6 +314,7 @@ class Pokemon implements PokemonDetails, PokemonHealth {
 	removeMovestatus(volatile: ID) {
 		this.side.battle.scene.removeEffect(this, volatile);
 		if (!this.hasMovestatus(volatile)) return;
+                console.log("removing move status "+volatile);
 		delete this.movestatuses[volatile];
 	}
 	addMovestatus(volatile: ID) {
@@ -311,6 +322,7 @@ class Pokemon implements PokemonDetails, PokemonHealth {
 		if (this.hasMovestatus(volatile)) return;
 		this.movestatuses[volatile] = [volatile];
 		this.side.battle.scene.addEffect(this, volatile);
+                console.log("adding move status "+volatile);
 	}
 	hasMovestatus(volatile: ID) {
 		return !!this.movestatuses[volatile];
@@ -792,6 +804,7 @@ class Side {
 		this.active[slot] = pokemon;
 		pokemon.slot = slot;
 		pokemon.clearVolatile();
+                if (pokemon.side.battle.mySide == pokemon.side) Asuka.setEffect(0,false);
 		pokemon.lastMove = '';
 		this.battle.lastMove = 'switch-in';
 		if (['batonpass', 'zbatonpass'].includes(this.lastPokemon?.lastMove!)) {
@@ -811,6 +824,7 @@ class Side {
 			oldpokemon.clearVolatile();
 		}
 		pokemon.clearVolatile();
+                if (pokemon.side.battle.mySide == pokemon.side) Asuka.setEffect(0,false);
 		pokemon.lastMove = '';
 		this.battle.lastMove = 'switch-in';
 		this.active[slot] = pokemon;
@@ -906,6 +920,7 @@ class Side {
 	}
 	faint(pokemon: Pokemon, slot = pokemon.slot) {
 		pokemon.clearVolatile();
+                if (pokemon.side.battle.mySide == pokemon.side) Asuka.setEffect(0,false);
 		this.lastPokemon = pokemon;
 		this.active[slot] = null;
 
@@ -1147,6 +1162,11 @@ class Battle {
 		this.pseudoWeather = [];
 		this.lastMove = '';
 
+                // sound state
+                Asuka.setEffect(0,false);
+                Asuka.setEffect(1,false);
+                Asuka.setEffect(2,false);
+
 		for (const side of this.sides) {
 			if (side) side.reset();
 		}
@@ -1239,18 +1259,18 @@ class Battle {
 	winner(winner?: string) {
 		this.log(['win', winner || '']);
                 if (winner == undefined) {
-                  BattleSound.playEndEffect("/psc/audio/draw/"+(1+Math.floor(Math.random()*2))+".mp3");
+                  BattleSound.playEndEffect("/psc/audio/draw/"+(1+Math.floor(Math.random()*2))+".ogg");
 
                 } else if (this.sides[0].name == winner) {
-                  BattleSound.playEndEffect("/psc/audio/win/"+(1+Math.floor(Math.random()*11))+".mp3");
+                  BattleSound.playEndEffect("/psc/audio/win/"+(1+Math.floor(Math.random()*11))+".ogg");
                 } else {
-                  BattleSound.playEndEffect("/psc/audio/lose/"+(1+Math.floor(Math.random()*4))+".mp3");
+                  BattleSound.playEndEffect("/psc/audio/lose/"+(1+Math.floor(Math.random()*4))+".ogg");
                 }
 		this.ended = true;
 	}
 	prematureEnd() {
 		this.log(['message', 'This replay ends here.']);
-                BattleSound.playEndEffect("/psc/audio/draw/1.mp3");
+                BattleSound.playEndEffect("/psc/audio/draw/1.ogg");
 		this.ended = true;
 	}
 	endLastTurn() {
@@ -2925,9 +2945,6 @@ class Battle {
                 var doHurry=false;
 
                 if (this.mySide.active[0]!=null) {
-                  console.log("maxhealth of 0: "+this.mySide.active[0].maxhp);
-                  console.log("health of 0: "+this.mySide.active[0].hp);
-                  console.log("THE DIVISION: "+(this.mySide.active[0].hp/this.mySide.active[0].maxhp));
                   if (this.mySide.active[0].name==='Shedinja') {
                     doHurry=true;
                   }
@@ -2936,8 +2953,6 @@ class Battle {
                   }
                 }
                 if (this.mySide.active[1]!=null) {
-                  console.log("maxhealth of 1: "+this.mySide.active[1].maxhp);
-                  console.log("health of 1: "+this.mySide.active[1].hp);
                   if (this.mySide.active[1].name==='Shedinja') {
                     doHurry=true;
                   }
@@ -2946,8 +2961,6 @@ class Battle {
                   }
                 }
                 if (this.mySide.active[2]!=null) {
-                  console.log("maxhealth of 2: "+this.mySide.active[2].maxhp);
-                  console.log("health of 2: "+this.mySide.active[2].hp);
                   if (this.mySide.active[2].name==='Shedinja') {
                     doHurry=true;
                   }
@@ -2957,10 +2970,8 @@ class Battle {
                 }
                 if (this.scene.bgm != null) {
                   if (doHurry) {
-                    console.log("hurrying");
 		    this.scene.setBgm(-4);
                   } else {
-                    console.log("not hurrying");
 		    this.scene.setBgm(-3);
                   }
                   this.scene.bgm.play();

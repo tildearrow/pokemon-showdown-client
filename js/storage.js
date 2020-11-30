@@ -503,7 +503,7 @@ Storage.initTestClient = function () {
 
 	Storage.whenAppLoaded(function (app) {
                 if ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) {
-                  var audCheck=new Audio("/psc/audio/notification.wav");
+                  var audCheck=new Audio("/psc/audio/bgm/silence_intro.wav");
                   let audCheck1=audCheck.play();
                   if (audCheck1 !== undefined) {
                     audCheck1.then(() => { 

@@ -532,8 +532,7 @@ class BattleScene {
 		}
 		animEntry.anim(this, participants.map(p => p.sprite));
 
-	        let soundExt = ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) ? '.mp3' : '.ogg';
-                BattleSound.playLocalEffect("/psc/audio/moves/"+BattleMoveSounds[moveid]+soundExt);
+                BattleSound.playLocalEffect("/psc/audio/moves/"+BattleMoveSounds[moveid]+".ogg");
 	}
 
 	runOtherAnim(moveid: ID, participants: Pokemon[]) {
@@ -905,6 +904,19 @@ class BattleScene {
 			weatherhtml += this.sideConditionsLeft(side);
 		}
 		if (weatherhtml) weatherhtml = `<br />` + weatherhtml;
+
+                console.log("the weather is "+weather);
+                // AMBIENT
+                if (weather === "sandstorm" || weather === "deltastream") {
+                  Asuka.setEffect(2,true);
+                } else {
+                  Asuka.setEffect(2,false);
+                }
+                if (weather === "hail") {
+                  Asuka.setEffect(1,true);
+                } else {
+                  Asuka.setEffect(1,false);
+                }
 
 		if (instant) {
 			this.$weather.html('<em>' + weatherhtml + '</em>');
@@ -1472,12 +1484,38 @@ class BattleScene {
 		this.preloadImage(Dex.resourcePrefix + 'sprites/ani-back/substitute.gif');
 	}
 	rollBgm() {
-		this.setBgm(1 + this.numericId % 110);
+                // this.battle.gen
+                switch (this.battle.gen) {
+                  case 8:
+                    this.setBgm(BGMMap8[this.numericId%(BGMMap8.length)]);
+                    break;
+                  case 7:
+                    this.setBgm(BGMMap7[this.numericId%(BGMMap7.length)]);
+                    break;
+                  case 6:
+                    this.setBgm(BGMMap6[this.numericId%(BGMMap6.length)]);
+                    break;
+                  case 5:
+                    this.setBgm(BGMMap5[this.numericId%(BGMMap5.length)]);
+                    break;
+                  case 4:
+                    this.setBgm(BGMMap4[this.numericId%(BGMMap4.length)]);
+                    break;
+                  case 3:
+                    this.setBgm(BGMMap3[this.numericId%(BGMMap3.length)]);
+                    break;
+                  case 2: case 1:
+                    this.setBgm(BGMMap2[this.numericId%(BGMMap2.length)]);
+                    break;
+                  default:
+                    this.setBgm(BGMMap7[this.numericId%(BGMMap9.length)]);
+                    break;
+                }
 	}
 	setBgm(bgmNum: number) {
 		if (this.bgmNum === bgmNum) return;
 
-                if (bgmNum>110 || bgmNum<1) {
+                if (bgmNum>181 || bgmNum<1) {
                   if (bgmNum==-6) {
 		    this.bgmNum = bgmNum;
 		    this.bgm = BattleSound.loadBgm('/psc/audio/test', 5001, 153819, this.bgm);
@@ -1494,8 +1532,8 @@ class BattleScene {
                     }
                   } else {
 		    this.bgmNum = bgmNum;
-		    this.bgm = BattleSound.loadBgm('/psc/audio/bgm/56', 5001, 153819, this.bgm);
-                    console.error("this music is not set");
+		    this.bgm = BattleSound.loadBgm('/psc/audio/test2', 5001, 153819, this.bgm);
+                    console.error("invalid music "+bgmNum);
                   }
                 } else {
 		        this.bgmNum = bgmNum;
@@ -2406,7 +2444,7 @@ class PokemonSprite extends Sprite {
 		if (pokemon.side.n === 1) return;
 
 		if (pokemon.speciesForme === 'Koffing' && pokemon.name.match(/dogars/i)) {
-			this.scene.setBgm(-1);
+			this.scene.setBgm(181);
 		} else if (this.scene.bgmNum === -1) {
 			this.scene.rollBgm();
 		}

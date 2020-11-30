@@ -3,14 +3,13 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta id="viewport" name="viewport" content="width=device-width" />
-		<title>Anti-Stress Tool</title>
+		<title>Showship!</title>
 		<link rel="shortcut icon" href="favicon.ico" id="dynamic-favicon" />
 		<link rel="stylesheet" href="style/battle.css" />
 		<link rel="stylesheet" href="style/client.css" />
 		<link rel="stylesheet" href="style/sim-types.css" />
 		<link rel="stylesheet" href="style/utilichart.css" />
 		<link rel="stylesheet" href="style/font-awesome.css" />
-		<link rel="stylesheet" href="/Gapless-5/gapless5.css" />
 		<meta name="robots" content="noindex" />
 		<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
 		<script src="https://play.pokemonshowdown.com/config/config.js"></script>
@@ -41,7 +40,6 @@
 		</script><![endif]-->
 	</head>
 	<body>
-                <div id="gapless5-block" style="display: none;"></div>
 		<div id="header" class="header">
 			<img class="logo" src="pokemonshowdownbeta.png" alt="Pok&eacute;mon Showdown! (beta)" width="146" height="44" /><div class="maintabbarbottom"></div>
 		</div>
@@ -52,9 +50,11 @@
 						<div class="pm-window news-embed">
 							<h3><button class="closebutton" tabindex="-1" aria-label="Close"><i class="fa fa-times-circle"></i></button><button class="minimizebutton" tabindex="-1" aria-label="Minimize"><i class="fa fa-minus-circle"></i></button>Latest News</h3>
 							<div class="pm-log" style="max-height:none">
+								<div class="newsentry"><h4>Asuka sound engine!</h4>hereby I would like to announce that this instance has now been ported to use the new in-house Asuka sound engine!<br/>this should completely eliminate gaps in music playback (that even Gapless-5 couldn't deal with), fix sound issues on Safari (well, kind of), and act as a proof-of-concept for the following:<br/><br/><i>The main complicated thing we do with sound is loop music with an intro.<br/>
+    This is unfortunately not supported by ANY sound library out there<br/>
+    (I had to manually add support for it myself to soundManager!)<br/><br/>
+    In the end, I don't think the existing libraries out there actually give us anything I care about.</i></p><p>&mdash;<strong>tildearrow</strong> <small class="date">on Oct 26, 2020</small></p></div>
 								<div class="newsentry"><h4>Safari work</h4>as of now this instance fully supports Safari. some bugs left to iron out, but it is mostly ready.</p><p>&mdash;<strong>tildearrow</strong> <small class="date">on Jun 28, 2020</small></p></div>
-								<div class="newsentry"><h4>audio fix playground</h4><p>this is a self-hosted instance of the client with Gapless-5 as music source instead of SoundManager. this fixes music cutoff under Android, and loops correctly.<br/>there is a lot of work to do, but it's the first step.<br/><br/>oh, and insert Touhou here.</p><p>&mdash;<strong>tildearrow</strong> <small class="date">on Jun 10, 2020</small></p></div>
-								<div class="newsentry"><h4>Test client</h4><p>Welcome to the test client! You can test client changes here!</p><p>&mdash;<strong>Zarel</strong> <small class="date">on Sep 25, 2015</small></p></div>
 							</div>
 						</div>
 					</div>
@@ -70,13 +70,56 @@
 			</div>
 		</div></div>
 		<script>
-			document.getElementById('loading-message').innerHTML += ' DONE<br />Loading libraries...';
+                        var weCanLoad=false;
+                        if (window.navigator.userAgent.indexOf('MSIE')>0) {
+		          document.getElementById('loading-message').innerHTML += 'FAILED<br /><br />Pok&eacute;mon Showdown does not support Internet Explorer.';
+                          document.execCommand('Stop');
+                        }
+                        if (window.navigator.userAgent.indexOf('Trident/')>0) {
+		          document.getElementById('loading-message').innerHTML += 'FAILED<br /><br />Pok&eacute;mon Showdown does not support Internet Explorer.';
+                          document.execCommand('Stop');
+                        }
+                        if (!window.WebAssembly) {
+		          document.getElementById('loading-message').innerHTML += 'FAILED<br /><br />Pok&eacute;mon Showdown requires WebAssembly for the sound engine.';
+                          window.stop();
+                        } else {
+		  	  document.getElementById('loading-message').innerHTML += ' DONE<br />Loading libraries...';
+                        }
 		</script>
 		<script nomodule src="/js/lib/ps-polyfill.js"></script>
 		<script src="js/lib/jquery-2.1.4.min.js"></script>
 		<script src="js/lib/jquery-cookie.js"></script>
 		<script src="js/lib/autoresize.jquery.min.js"></script>
-		<script src="/Gapless-5/gapless5.js"></script>
+                <script>
+	          document.getElementById('loading-message').innerHTML += ' DONE<br />Loading sound...';
+                  !function(e, t){
+                    console.log("Loading client...");
+                    var n = "js/lib/asuka.js";
+                    console.log("Script set to " + n);
+                    var o = t.createElement("script");
+                    o.async = !0, o.type = "text/javascript", o.src = n, o.onerror = function(t) {
+                      console.error("Script Error"), console.error(t), setTimeout(function() {
+                        document.getElementById('loading-message').innerHTML += ' FAILUREEEEEE'
+                      }, 3e3)
+                    };
+                    var r = t.getElementsByTagName("script")[0];
+                    r.parentNode.insertBefore(o, r)
+                  }(window, document);
+                  var Asuka = {
+                    onRuntimeInitialized: function() {
+                      console.log("sound is up");
+                      if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+                        Asuka.setBufSize(2048);
+                      }
+                      if (!weCanLoad) {
+	                document.getElementById('loading-message').innerHTML += ' DONE<br />Still loading stuff...';
+                        weCanLoad=true;
+                      } else {
+			window.app = new App();
+                      }
+                    }
+                  }
+                </script>
 		<script src="js/battle-sound.js"></script>
 		<script src="config/testclient-key.js"></script>
 		<script src="js/lib/html-css-sanitizer-minified.js"></script>
@@ -128,7 +171,12 @@
 
 		<script>
 			window.onload = () => {
-				window.app = new App();
+                          if (!weCanLoad) {
+	                    document.getElementById('loading-message').innerHTML += ' DONE<br />Still loading sound...';
+                            weCanLoad=true;
+                          } else {
+			    window.app = new App();
+                          }
 			}
 		</script>
 

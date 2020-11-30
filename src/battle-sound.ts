@@ -1,56 +1,43 @@
-g5inst=new Gapless5("gapless5-block", {
-                          loop: true,
-                          tracks: ["/psc/audio/bgm/silence_intro.mp3", "/psc/audio/bgm/silence_loop.mp3"],
-});
+// BattleBGM using Asuka instead of the browser's own Audio.
+// Safari sucks
 
-// TODO: please fix looping. perhaps use howler.js.
 class BattleBGM {
        /**
         * May be shared with other BGM objects: every battle has its own BattleBGM
         * object, but two battles with the same music will have the same SMSound- erm Audio
-        * object.
+        * ob- wait. come on Asuka::Music object.
         */
-       sound: Gapless5;
+       sound: null;
        isPlaying = false;
        constructor(url: string) {
                this.url = url;
-               let ext = ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) ? '.mp3' : '.ogg';
-               //this.sound = sound;
-               this.sound = g5inst;
-               this.sound.stop();
-               console.log("loading thingy");
-               this.sound.insertTrack(0,url+"_intro"+ext);
-               this.sound.insertTrack(1,url+"_loop"+ext);
-               this.sound.gotoTrack(0,false);
-               while (this.sound.totalTracks()>2) {
-                 this.sound.removeTrack(2);
-               }
-               this.sound.setGain(BattleSound.bgmVolume*655.35);
+               Asuka.loadSong(0,0,url);
+               Asuka.setMusicVolume(0,0,BattleSound.bgmVolume/100.00);
        }
        play() {
                if (this.isPlaying) return;
                this.isPlaying = true;
                if (BattleSound.muted || !BattleSound.bgmVolume) return;
-               this.sound.setGain(BattleSound.bgmVolume*655.35);
-               this.sound.play();
+               Asuka.setMusicVolume(0,0,BattleSound.bgmVolume/100.00);
+               Asuka.play(0,0);
        }
        pause() {
                this.isPlaying = false;
-               this.sound.pause();
+               Asuka.stop(0,0);
                BattleBGM.update();
        }
        resume() {
-               this.play();
+               Asuka.play(0,0);
        }
        stop() {
                this.isPlaying = false;
-               this.sound.stop();
-               this.sound.gotoTrack(0,false);
+               Asuka.stop(0,0);
+               Asuka.goBegin(0,0);
        }
        destroy() {
                this.isPlaying = false;
-               this.sound.stop();
-               this.sound.gotoTrack(0,false);
+               Asuka.stop(0,0);
+               Asuka.goBegin(0,0);
                const soundIndex = BattleSound.bgm.indexOf(this);
                if (soundIndex >= 0) BattleSound.bgm.splice(soundIndex, 1);
                BattleBGM.update();
@@ -59,10 +46,10 @@ class BattleBGM {
                for (const bgm of BattleSound.bgm) {
                        if (bgm.isPlaying) {
                                if (BattleSound.muted || !BattleSound.bgmVolume) {
-                                       bgm.sound.pause();
+                                       Asuka.stop(0,0);
                                } else {
-                                       bgm.sound.setGain(BattleSound.bgmVolume*655.35);
-                                       bgm.sound.play();
+                                       Asuka.setMusicVolume(0,0,BattleSound.bgmVolume/100.00);
+                                       Asuka.play(0,0);
                                }
                                break;
                        }
@@ -75,115 +62,31 @@ const BattleSound = new class {
 
 	bgm: BattleBGM[] = [];
 
+        endEffectID = -1;
+
 	// options
 	effectVolume = 50;
 	bgmVolume = 50;
+	weatherVolume = 50;
 	muted = false;
-
-	getSound(url: string) {
-                if ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) {
-                  if (url.match("notification")) {
-                    sCN='duo';
-                    return null;
-                  } else {
-                    sCN='mono';
-                  }
-		  if (this.soundCache[sCN]) {
-                    this.soundCache[sCN].src = url;
-                    this.soundCache[sCN].load();
-                    this.soundCache[sCN].volume=this.effectVolume/100;
-                    return this.soundCache[sCN];
-                  }
-                } else {
-                  sCN=url;
-		  if (this.soundCache[sCN]) {
-                     this.soundCache[sCN].currentTime=0;
-                     return this.soundCache[sCN];
-                  }
-                }
-		try {
-			this.soundCache[sCN] = new Audio(url);
-			this.soundCache[sCN].volume = this.effectVolume / 100;
-			return this.soundCache[sCN];
-		} catch {}
-	}
-
-	getLocalSound(url: string) {
-                if ((navigator.userAgent.indexOf("Chrome") == -1) && (navigator.userAgent.indexOf("Safari") != -1)) {
-                  sCN='mono';
-		  if (this.soundCache[sCN]) {
-                    this.soundCache[sCN].src = url;
-                    this.soundCache[sCN].load();
-                    this.soundCache[sCN].volume=this.effectVolume/100;
-                    return this.soundCache[sCN];
-                  }
-                } else {
-                  sCN=url;
-		  if (this.soundCache[sCN]) {
-                     this.soundCache[sCN].currentTime=0;
-                     return this.soundCache[sCN];
-                  }
-                }
-		try {
-			this.soundCache[sCN] = new Audio(url);
-			this.soundCache[sCN].volume = this.effectVolume / 100;
-			return this.soundCache[sCN];
-		} catch {}
-	}
+        menuSounds = true;
 
 	playEffect(url: string) {
-		this.playSound(url, this.muted ? 0 : this.effectVolume);
-	}
-
-	playSound(url: string, volume: number) {
-		if (!volume) return;
-		const effect = this.getSound(url);
-		if (effect) {
-			effect.volume = volume / 100;
-			effect.play();
-		}
+                Asuka.playSoundVol(0,url,this.muted ? 0 : this.effectVolume/100);
 	}
 
         playLocalEffect(url: string) {
-          this.playLocalSound(url, this.muted ? 0 : this.effectVolume);
+                Asuka.playSoundVol(0,url,this.muted ? 0 : this.effectVolume/100);
         }
 
-	playLocalSound(url: string, volume: number) {
-		if (!volume) return;
-		const effect = this.getLocalSound(url);
-		if (effect) {
-			effect.volume = volume / 100;
-			effect.play();
-		}
-	}
-
-        loadEndEffect(url: string) {
-                if (this.soundCache['endbgm']) {
-                    this.soundCache['endbgm'].src = url;
-                    this.soundCache['endbgm'].load();
-                    this.soundCache['endbgm'].volume=this.effectVolume/100;
-                } else {
-                 try {
-                    this.soundCache['endbgm'] = new Audio(url);
-                    this.soundCache['endbgm'].volume=this.effectVolume/100;
-                 } catch {}
-                 if (!this.soundCache['endbgm']) {
-                   this.soundCache['endbgm'] = this.soundPlaceholder;
-                 }
-                }
-               return this.soundCache['endbgm'];
-        }
         playEndEffect(url: string) {
-               if (!this.muted) {
-                  var s=this.loadEndEffect(url);
-                  s.volume=this.effectVolume/100;
-                  if (s.paused) s.play();
-                }
+               this.stopEndEffect();
+               this.endEffectID=Asuka.playSoundVol(0,url,this.muted ? 0 : this.effectVolume/100);
         }
         stopEndEffect() {
-          if (this.soundCache['endbgm']) {
-            this.soundCache['endbgm'].pause();
-            this.soundCache['endbgm'].currentTime=0;
+          if (this.endEffectID>-1) {
+            Asuka.stopSound(0,this.endEffectID);
+            this.endEffectID=-1;
           }
         }
 
@@ -216,11 +119,15 @@ const BattleSound = new class {
 		this.muted = muted;
 		BattleBGM.update();
 	}
+	setMenuSounds(menuSounds: boolean) {
+		menuSounds = !!menuSounds;
+		if (this.menuSounds=== menuSounds) return;
+		this.menuSounds = menuSounds;
+	}
 
 	loudnessPercentToAmplitudePercent(loudnessPercent: number) {
 		// 10 dB is perceived as approximately twice as loud
-		let decibels = 10 * Math.log(loudnessPercent / 100) / Math.log(2);
-		return Math.pow(10, decibels / 20) * 100;
+                return loudnessPercent;
 	}
 	setBgmVolume(bgmVolume: number) {
 		this.bgmVolume = this.loudnessPercentToAmplitudePercent(bgmVolume);

@@ -185,12 +185,6 @@ const Dex = new class implements ModdedDex {
 		return `${prefix}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/`;
 	})();
 
-	bgmPrefix = (() => {
-		let prefix = '';
-		if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
-		return `${prefix}//tildearrow.zapto.org/psc/`;
-	})();
-
 	fxPrefix = (() => {
 		if (window.document?.location?.protocol === 'file:') {
 			if (window.Replays) return `https://${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/fx/`;
@@ -581,7 +575,7 @@ const Dex = new class implements ModdedDex {
 			)) {
 				spriteData.cryurl += formeid;
 			}
-			spriteData.cryurl += (window.nodewebkit ? '.ogg' : '.mp3');
+			spriteData.cryurl += '.ogg';
 		}
 
 		if (options.shiny && mechanicsGen > 1) dir += '-shiny';
@@ -607,7 +601,7 @@ const Dex = new class implements ModdedDex {
 		// Mod Cries
 		if (options.mod) {
 			spriteData.cryurl = `sprites/${options.mod}/audio/${toID(species.baseSpecies)}`;
-			spriteData.cryurl += (window.nodewebkit ? '.ogg' : '.mp3');
+			spriteData.cryurl += '.ogg';
 		}
 
 		if (animationData[facing + 'f'] && options.gender === 'F') facing += 'f';

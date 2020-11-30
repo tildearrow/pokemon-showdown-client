@@ -212,8 +212,8 @@ const PSBackground = new class extends PSStreamModel {
 		if (!bgid) {
 			if (location.host === 'smogtours.psim.us') {
 				bgid = 'shaymin';
-			} else if (location.host === Config.routes.client) {
-				const bgs = ['horizon', 'ocean', 'waterfall', 'shaymin', 'charizards'];
+			} else {
+				const bgs = ['horizon', 'ocean', 'waterfall', 'shaymin', 'charizards', 'peace'];
 				bgid = bgs[Math.floor(Math.random() * 5)];
 				if (bgid === this.curId) bgid = bgs[Math.floor(Math.random() * 5)];
 			}
@@ -306,6 +306,21 @@ const PSBackground = new class extends PSStreamModel {
 				url: 'https://seiryuuden.deviantart.com/art/The-Ultimate-Mega-Showdown-Charizards-414587079',
 				title: 'Charizards',
 				artist: 'Jessica Valencia',
+			};
+			break;
+		case 'peace':
+			menuColors = [
+				"37.159090909090914,74.57627118644066%",
+				"10.874999999999998,70.79646017699115%",
+				"179.51612903225808,52.10084033613446%",
+				"20.833333333333336,36.73469387755102%",
+				"192.3076923076923,80.41237113402063%",
+				"210,29.629629629629633%",
+			];
+			attrib = {
+				url: 'https://kdeonlinux.wordpress.com/2015/11/13/wallpaper-contribution-for-plasma-5-5/',
+				title: 'summer 1am',
+				artist: 'Risto Saukonpää',
 			};
 			break;
 		case 'digimon':
