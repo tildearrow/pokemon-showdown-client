@@ -342,12 +342,12 @@ assert(!0);
 Ga(P);
 function Ia() {
   assert(!0);
-  Q[47001] = 34821223;
-  Q[47002] = 2310721022;
+  Q[47897] = 34821223;
+  Q[47898] = 2310721022;
   E[0] = 1668509029;
 }
 function Ja() {
-  var b = Q[47001], c = Q[47002];
+  var b = Q[47897], c = Q[47898];
   34821223 == b && 2310721022 == c || x("Stack overflow! Stack cookie has been overwritten, expected hex dwords 0x89BACDFE and 0x2135467, but received 0x" + c.toString(16) + " " + b.toString(16));
   1668509029 !== E[0] && x("Runtime error: The application has corrupted its heap memory area (address zero)!");
 }
@@ -468,19 +468,19 @@ function db() {
     return cb();
   });
 }
-var qa, pa, fb = {7666:function() {
+var qa, pa, fb = {7730:function() {
   return "undefined" !== typeof AudioContext || "undefined" !== typeof webkitAudioContext ? 1 : 0;
-}, 7832:function() {
+}, 7896:function() {
   return "undefined" !== typeof navigator.mediaDevices && "undefined" !== typeof navigator.mediaDevices.getUserMedia || "undefined" !== typeof navigator.webkitGetUserMedia ? 1 : 0;
-}, 8058:function(b) {
+}, 8122:function(b) {
   "undefined" === typeof a.SDL2 && (a.SDL2 = {});
   var c = a.SDL2;
   b ? c.capture = {} : c.audio = {};
   c.a || ("undefined" !== typeof AudioContext ? c.a = new AudioContext : "undefined" !== typeof webkitAudioContext && (c.a = new webkitAudioContext));
   return void 0 === c.a ? -1 : 0;
-}, 8541:function() {
+}, 8605:function() {
   return a.SDL2.a.sampleRate;
-}, 8611:function(b, c, e, f) {
+}, 8675:function(b, c, e, f) {
   function g() {
   }
   function k(m) {
@@ -502,14 +502,14 @@ var qa, pa, fb = {7666:function() {
     eb("vi", e, [f]);
   }, c / h.a.sampleRate * 1000);
   void 0 !== navigator.mediaDevices && void 0 !== navigator.mediaDevices.getUserMedia ? navigator.mediaDevices.getUserMedia({audio:!0, video:!1}).then(k).catch(g) : void 0 !== navigator.webkitGetUserMedia && navigator.webkitGetUserMedia({audio:!0, video:!1}, k, g);
-}, 10263:function(b, c, e, f) {
+}, 10327:function(b, c, e, f) {
   var g = a.SDL2;
   g.audio.b = g.a.createScriptProcessor(c, 0, b);
   g.audio.b.onaudioprocess = function(k) {
     void 0 !== g && void 0 !== g.audio && (g.audio.i = k.outputBuffer, eb("vi", e, [f]));
   };
   g.audio.b.connect(g.a.destination);
-}, 10673:function(b, c) {
+}, 10737:function(b, c) {
   for (var e = a.SDL2, f = e.capture.o.numberOfChannels, g = 0; g < f; ++g) {
     var k = e.capture.o.getChannelData(g);
     if (k.length != c) {
@@ -525,7 +525,7 @@ var qa, pa, fb = {7666:function() {
       }
     }
   }
-}, 11278:function(b, c) {
+}, 11342:function(b, c) {
   for (var e = a.SDL2, f = e.audio.i.numberOfChannels, g = 0; g < f; ++g) {
     if ("function" === typeof e.audio.i.copyToChannel) {
       for (var k = new Float32Array(c), h = 0; h < c; ++h) {
@@ -542,7 +542,7 @@ var qa, pa, fb = {7666:function() {
       }
     }
   }
-}, 12045:function(b) {
+}, 12109:function(b) {
   var c = a.SDL2;
   if (b) {
     void 0 !== c.capture.h && clearTimeout(c.capture.h);

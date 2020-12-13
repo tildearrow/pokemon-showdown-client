@@ -275,6 +275,9 @@ class Pokemon implements PokemonDetails, PokemonHealth {
                 if (volatile == "confusion") {
                   if (this.side.battle.mySide == this.side) Asuka.setEffect(0,false);
                 }
+                if (volatile == "dynamax") {
+                  this.side.battle.checkHurry();
+                }
 	}
 	addVolatile(volatile: ID, ...args: any[]) {
 		if (this.hasVolatile(volatile) && !args.length) return;
@@ -283,6 +286,9 @@ class Pokemon implements PokemonDetails, PokemonHealth {
                 console.log("adding volatile "+volatile);
                 if (volatile == "confusion") {
                   if (this.side.battle.mySide == this.side) Asuka.setEffect(0,true);
+                }
+                if (volatile == "dynamax") {
+                  this.side.battle.checkHurry();
                 }
 	}
 	hasVolatile(volatile: ID) {
@@ -1178,6 +1184,9 @@ class Battle {
                 Asuka.setEffect(0,false);
                 Asuka.setEffect(1,false);
                 Asuka.setEffect(2,false);
+                Asuka.setEffect(3,false);
+                Asuka.setEffect(4,false);
+                Asuka.setEffect(5,false);
 
 		for (const side of this.sides) {
 			if (side) side.reset();
@@ -1271,11 +1280,10 @@ class Battle {
 		this.log(['win', winner || '']);
                 if (winner == undefined) {
                   BattleSound.playEndEffect("/psc/audio/draw/"+(1+Math.floor(Math.random()*2))+".ogg");
-
-                } else if (this.sides[0].name == winner) {
-                  BattleSound.playEndEffect("/psc/audio/win/"+(1+Math.floor(Math.random()*11))+".ogg");
+                } else if (this.mySide.name == winner) {
+                  BattleSound.playEndEffect("/psc/audio/win/"+(1+Math.floor(Math.random()*10))+".ogg");
                 } else {
-                  BattleSound.playEndEffect("/psc/audio/lose/"+(1+Math.floor(Math.random()*4))+".ogg");
+                  BattleSound.playEndEffect("/psc/audio/lose/"+(1+Math.floor(Math.random()*5))+".ogg");
                 }
 		this.ended = true;
 	}
@@ -1978,6 +1986,9 @@ class Battle {
 		}
 		case '-status': {
 			let poke = this.getPokemon(args[1])!;
+                        if (poke.side === this.mySide) {
+                          Asuka.setEffect(3,false);
+                        }
 			let effect = Dex.getEffect(kwArgs.from);
 			let ofpoke = this.getPokemon(kwArgs.of) || poke;
 			poke.status = args[2] as StatusName;
@@ -2003,6 +2014,9 @@ class Battle {
 				break;
 			case 'slp':
 				this.scene.resultAnim(poke, 'Asleep', 'slp');
+                                if (poke.side === this.mySide) {
+                                  Asuka.setEffect(3,true);
+                                }
 				if (effect.id === 'rest') {
 					poke.statusData.sleepTurns = 0; // for Gen 2 use through Sleep Talk
 				}
@@ -2013,6 +2027,9 @@ class Battle {
 				break;
 			case 'frz':
 				this.scene.resultAnim(poke, 'Frozen', 'frz');
+                                if (poke.side === this.mySide) {
+                                  Asuka.setEffect(3,true);
+                                }
 				this.scene.runStatusAnim('frz' as ID, [poke]);
 				break;
 			default:
@@ -2040,6 +2057,7 @@ class Battle {
 			}
 			if (poke) {
 				poke.status = '';
+                                this.checkHurry();
 				switch (args[2]) {
 				case 'brn':
 					this.scene.resultAnim(poke, 'Burn cured', 'good');
@@ -2966,41 +2984,59 @@ class Battle {
 	}
         checkHurry() {
                 var doHurry=false;
+                var alreadySlp=false;
 
-                if (this.mySide.active[0]!=null) {
-                  if (this.mySide.active[0].name==='Shedinja') {
-                    doHurry=true;
-                  }
-                  if ((this.mySide.active[0].hp/this.mySide.active[0].maxhp)<=0.05 && this.mySide.active[0].hp>0) {
-                    doHurry=true;
-                  }
-                }
-                if (this.mySide.active[1]!=null) {
-                  if (this.mySide.active[1].name==='Shedinja') {
-                    doHurry=true;
-                  }
-                  if ((this.mySide.active[1].hp/this.mySide.active[1].maxhp)<=0.05 && this.mySide.active[1].hp>0) {
-                    doHurry=true;
-                  }
-                }
-                if (this.mySide.active[2]!=null) {
-                  if (this.mySide.active[2].name==='Shedinja') {
-                    doHurry=true;
-                  }
-                  if ((this.mySide.active[2].hp/this.mySide.active[2].maxhp)<=0.05 && this.mySide.active[2].hp>0) {
-                    doHurry=true;
+                for (let i=0; i<3; i++) {
+                  if (this.mySide.active[i]!=null) {
+                    if (this.mySide.active[i].name==='Shedinja') {
+                      doHurry=true;
+                    }
+                    if ((this.mySide.active[i].hp/this.mySide.active[i].maxhp)<=0.05 && this.mySide.active[i].hp>0) {
+                      doHurry=true;
+                    }
+                    if (this.mySide.active[i].status === "slp" || this.mySide.active[i].status === "frz" || alreadySlp) {
+                      Asuka.setEffect(3,true);
+                      alreadySlp=true;
+                    } else {
+                      Asuka.setEffect(3,false);
+                    }
                   }
                 }
                 if (this.scene.bgm != null) {
                   if (doHurry) {
 		    this.scene.setBgm(-4);
                   } else {
+                    
 		    this.scene.setBgm(-3);
                   }
                   this.scene.bgm.play();
                 } else {
                   console.log("bgm is null. skipping.");
                 }
+
+                // ambient check
+                var doAmbient=false;
+                if (this.p1.active[0]!=null) {
+                  if (this.p1.active[0].hasVolatile("dynamax")) {
+                    doAmbient=true;
+                  }
+                }
+                if (this.p1.active[1]!=null) {
+                  if (this.p1.active[1].hasVolatile("dynamax")) {
+                    doAmbient=true;
+                  }
+                }
+                if (this.p2.active[0]!=null) {
+                  if (this.p2.active[0].hasVolatile("dynamax")) {
+                    doAmbient=true;
+                  }
+                }
+                if (this.p2.active[1]!=null) {
+                  if (this.p2.active[1].hasVolatile("dynamax")) {
+                    doAmbient=true;
+                  }
+                }
+                this.scene.ambientBgm(doAmbient);
         }
 	parseHealth(hpstring: string, output: PokemonHealth = {} as any) {
 		let [hp, status] = hpstring.split(' ');
@@ -3210,6 +3246,7 @@ class Battle {
 			if (this.tier.slice(-8) === ' (Blitz)') {
 				this.messageFadeTime = 40;
 				this.isBlitz = true;
+                                this.scene.isBlitz = true;
 			}
 			this.log(args);
 			break;
@@ -3240,6 +3277,7 @@ class Battle {
 			if (ruleName === 'Blitz') {
 				this.messageFadeTime = 40;
 				this.isBlitz = true;
+				this.scene.isBlitz = true;
 			}
 			this.log(args);
 			break;

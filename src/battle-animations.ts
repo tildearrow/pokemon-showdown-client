@@ -33,6 +33,7 @@ This license DOES NOT extend to any other files in this repository.
 class BattleScene {
 	battle: Battle;
 	animating = true;
+        isBlitz = false;
 	acceleration = 1;
 
 	/** Note: Not the actual generation of the battle, but the gen of the sprites/background */
@@ -72,6 +73,7 @@ class BattleScene {
 	backdropImage: string = '';
 	bgmNum = 0;
 	oldBgmNum = -1;
+        ambBgm = false;
 	preloadCache: {[url: string]: HTMLImageElement} = {};
 
 	messagebarOpen = false;
@@ -110,6 +112,9 @@ class BattleScene {
 		let numericId = 0;
 		if (battle.id) {
 			numericId = parseInt(battle.id.slice(battle.id.lastIndexOf('-') + 1), 10);
+                        if (!numericId) {
+			  numericId = parseInt(battle.id.slice(battle.id.lastIndexOf('-') - 10), 10);
+                        }
 			if (this.battle.id.includes('digimon')) this.mod = 'digimon';
 		}
 		if (!numericId) {
@@ -532,7 +537,11 @@ class BattleScene {
 		}
 		animEntry.anim(this, participants.map(p => p.sprite));
 
-                BattleSound.playLocalEffect("/psc/audio/moves/"+BattleMoveSounds[moveid]+".ogg");
+                if (this.isBlitz) {
+                  BattleSound.playBlitzEffect("/psc/audio/moves/"+BattleMoveSounds[moveid]+".ogg");
+                } else {
+                  BattleSound.playLocalEffect("/psc/audio/moves/"+BattleMoveSounds[moveid]+".ogg");
+                }
 	}
 
 	runOtherAnim(moveid: ID, participants: Pokemon[]) {
@@ -917,6 +926,16 @@ class BattleScene {
                   Asuka.setEffect(1,true);
                 } else {
                   Asuka.setEffect(1,false);
+                }
+                if (weather === "raindance" || weather === "primordialsea") {
+                  Asuka.setEffect(4,true);
+                } else {
+                  Asuka.setEffect(4,false);
+                }
+                if (weather === "primordialsea") {
+                  Asuka.setEffect(5,true);
+                } else {
+                  Asuka.setEffect(5,false);
                 }
 
 		if (instant) {
@@ -1542,6 +1561,26 @@ class BattleScene {
 			this.bgm = BattleSound.loadBgm('/psc/audio/bgm/'+this.bgmNum, 5001, 153819, this.bgm);
                 }
 	}
+        ambientBgm(perform: boolean) {
+          if (this.ambBgm == perform) return;
+          this.ambBgm=perform;
+          if (this.oldBgmNum>=0) {
+            // switch if available
+            if (hasAmbient[this.oldBgmNum-2]) {
+              if (perform) {
+                this.bgm = BattleSound.loadBgm('/psc/audio/bgm/'+this.oldBgmNum+'a', 5001, 153819, this.bgm);
+              } else {
+                this.bgm = BattleSound.loadBgm('/psc/audio/bgm/'+this.oldBgmNum, 5001, 153819, this.bgm);
+              }
+              if (this.isBlitz) {
+                Asuka.setMusicSpeed(0,0,1.5);
+              } else {
+                Asuka.setMusicSpeed(0,0,1);
+              }
+              this.bgm.play();
+            }
+          }
+        }
 	updateBgm() {
 		/**
 		 * - not playing in non-battle RoomGames (Playback.Uninitialized)
@@ -1557,6 +1596,11 @@ class BattleScene {
 		);
 		if (nowPlaying) {
 			if (!this.bgm) this.rollBgm();
+                        if (this.isBlitz) {
+                          Asuka.setMusicSpeed(0,0,1.5);
+                        } else {
+                          Asuka.setMusicSpeed(0,0,1);
+                        }
 			this.bgm.play();
 		} else if (this.bgm) {
 			this.bgm.pause();
@@ -1909,6 +1953,7 @@ class PokemonSprite extends Sprite {
 			z: this.z,
 			opacity: 0,
 		}, this.subsp!), 500);
+                BattleSound.playLocalEffect('audio/fall.ogg');
 
 		this.$sub = null;
 		this.anim({time: 500});
@@ -2346,6 +2391,7 @@ class PokemonSprite extends Sprite {
 		if (this.cryurl) {
 			BattleSound.playEffect(this.cryurl);
 		}
+                BattleSound.playLocalEffect('audio/fall.ogg');
 		this.anim({
 			y: this.y - 80,
 			opacity: 0,
@@ -3870,6 +3916,7 @@ const BattleOtherAnims: AnimTable = {
 	},
 	heal: {
 		anim(scene, [attacker]) {
+                        BattleSound.playLocalEffect("/psc/audio/moves/conversion.ogg");
 			scene.showEffect('iceball', {
 				x: attacker.x + 30,
 				y: attacker.y + 5,
@@ -5819,6 +5866,8 @@ const BattleStatusAnims: AnimTable = {
 	},
 	flinch: {
 		anim(scene, [attacker]) {
+                        // sound effect
+                        BattleSound.playLocalEffect("/psc/audio/moves/kinesis.ogg");
 			scene.showEffect('shadowball', {
 				x: attacker.x,
 				y: attacker.y,

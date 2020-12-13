@@ -79,6 +79,10 @@ const BattleSound = new class {
                 Asuka.playSoundVol(0,url,this.muted ? 0 : this.effectVolume/100);
         }
 
+        playBlitzEffect(url: string) {
+                Asuka.playSoundEx(0,url,this.muted ? 0 : this.effectVolume/100,4.0);
+        }
+
         playEndEffect(url: string) {
                this.stopEndEffect();
                this.endEffectID=Asuka.playSoundVol(0,url,this.muted ? 0 : this.effectVolume/100);
