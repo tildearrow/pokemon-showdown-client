@@ -1546,19 +1546,26 @@ Storage.nwLoadTeamFile = function (filename, localApp) {
 		return;
 	}
 
-	var format = '';
+	var format = 'gen8';
+	var capacity = 6;
 	var bracketIndex = line.indexOf(']');
 	if (bracketIndex >= 0) {
 		format = line.slice(1, bracketIndex);
+		if (format && !format.startsWith('gen')) format = 'gen6' + format;
+		if (format && /^gen6gen[0-9]/.test(format)) format = format.slice(4);
+		if (format && format.endsWith('-box')) {
+			format = format.slice(0, -4);
+			capacity = 24;
+		}
 		line = $.trim(line.slice(bracketIndex + 1));
 	}
-	if (format && format.slice(0, 3) !== 'gen') format = 'gen6' + format;
 	fs.readFile(this.dir + 'Teams/' + filename, function (err, data) {
 		if (!err) {
 			self.teams.push({
 				name: line,
 				format: format,
 				team: Storage.packTeam(Storage.importTeam('' + data)),
+				capacity: capacity,
 				folder: folder,
 				iconCache: '',
 				filename: filename
@@ -1632,7 +1639,7 @@ Storage.nwDeleteTeamFile = function (filename, callback) {
 Storage.nwSaveTeam = function (team) {
 	if (!team) return;
 	var filename = team.name + '.txt';
-	if (team.format) filename = '[' + team.format + '] ' + filename;
+	if (team.format) filename = '[' + team.format + (team.capacity === 24 ? '-box] ' : '] ') + filename;
 	filename = filename.trim().replace(/[\\\/]+/g, '');
 	if (team.folder) filename = '' + team.folder.replace(/[\\\/]+/g, '') + '/' + filename;
 
@@ -1680,7 +1687,7 @@ Storage.nwDoSaveAllTeams = function () {
 	for (var i = 0; i < this.teams.length; i++) {
 		var team = this.teams[i];
 		var filename = team.name + '.txt';
-		if (team.format) filename = '[' + team.format + '] ' + filename;
+		if (team.format) filename = '[' + team.format + (team.capacity === 24 ? '-box] ' : '] ') + filename;
 		filename = $.trim(filename).replace(/[\\\/]+/g, '');
 
 		team.filename = filename;
