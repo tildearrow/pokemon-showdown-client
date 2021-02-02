@@ -1111,7 +1111,7 @@ class Battle {
 			throw new Error(`You must specify $frame and $logFrame simultaneously`);
 		}
 
-		this.paused = !!options.paused;
+		this.paused = false;
 		this.started = !this.paused;
 		this.debug = !!options.debug;
 		this.stepQueue = options.log || [];
@@ -1154,10 +1154,10 @@ class Battle {
 		return false;
 	}
 	reset() {
-		this.paused = true;
-		this.scene.pause();
+		//this.paused = true;
+		//this.scene.pause();
 		this.resetStep();
-		this.subscription?.('paused');
+		//this.subscription?.('paused');
 	}
 	resetStep() {
 		// battle state
@@ -1190,18 +1190,12 @@ class Battle {
 		// activity queue state
 		this.activeMoveIsSpread = null;
 		this.currentStep = 0;
-		this.paused = true;
+		this.paused = false;
 		this.resetTurnsSinceMoved();
 		this.nextStep();
 
                 // possibly
-		if (this.playbackState !== Playback.Seeking) {
-			this.playbackState = Playback.Uninitialized;
-			if (!dontResetSound) {
-                          this.scene.resetBgm();
-                          BattleSound.stopEndEffect();
-                        }
-		}
+                BattleSound.stopEndEffect();
 	}
 	destroy() {
 		this.scene.destroy();
